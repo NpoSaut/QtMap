@@ -10,7 +10,7 @@ SystemStateViewModel *systemState ;
 
 void getSpeed (double* speed)
 {
-    systemState->setSpeedValue(*speed);
+    systemState->setSpeed(*speed);
 }
 
 //extern void aFunction();
