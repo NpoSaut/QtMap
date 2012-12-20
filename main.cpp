@@ -93,8 +93,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
 
-    QtConcurrent::run(getParamsFromCan);
     QtConcurrent::run(getParamsFromConsole);
+//    QtConcurrent::run(getParamsFromCan);
 
     return app->exec();
 }
