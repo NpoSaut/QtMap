@@ -11,7 +11,46 @@ SystemStateViewModel *systemState ;
 
 void getSpeed (double* speed)
 {
-    systemState->setSpeed(*speed);
+    systemState->setSpeed( int(*speed) );
+}
+
+void getSpeedLimits (int* val)
+{
+    systemState->setSpeedRestriction(*val);
+}
+
+void getLights (int* code)
+{
+    systemState->setLight(*code);
+}
+
+void getAlsn (int* code)
+{
+    if (*code == 0)
+        systemState->setAlsnFreq(50);
+    else if (*code == 1)
+        systemState->setAlsnFreq(75);
+    else if (*code == 2)
+        systemState->setAlsnFreq(50);
+    else if (*code == 3)
+        systemState->setAlsnFreq(25);
+}
+
+void getMilage (int* val)
+{
+    systemState->setMilage( (*val)/1000 );
+}
+
+void getGps (double* lat, double* lon)
+{
+    systemState->setLongitude(*lon);
+    systemState->setLatitude(*lat);
+}
+
+void getDateTime (int* h, int* m, int* s)
+{
+    QString date = QString("%1:%2:%3").arg(*h).arg(*m).arg(*s);
+    systemState->setTime(date);
 }
 
 //extern void aFunction();
@@ -19,7 +58,7 @@ void getSpeed (double* speed)
 void getParamsFromCan ()
 {
     sktcanl_init();
-    sktcanl_set_callbacks(getSpeed, NULL, NULL);
+    sktcanl_set_callbacks(getSpeed, getSpeedLimits, NULL, NULL, getLights, getAlsn, getMilage, NULL, NULL, getGps, getDateTime);
 
     while (true)
     {
@@ -73,6 +112,11 @@ void getParamsFromConsole ()
             systemState->setLight( cmd.at(1).toInt() );
             out << "Liht: " << systemState->getLight() << endl;
         }
+        else if (cmd.at(0) == "a")
+        {
+            systemState->setAlsnFreq( cmd.at(1).toInt() );
+            out << "AlsnFreq: " << systemState->getAlsnFreq() << endl;
+        }
         else
         {
             out << "! unknown command. Try this: s r map property g" << endl;
@@ -98,8 +142,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
 
-    QtConcurrent::run(getParamsFromConsole);
-//    QtConcurrent::run(getParamsFromCan);
+//    QtConcurrent::run(getParamsFromConsole);
+    QtConcurrent::run(getParamsFromCan);
 
     return app->exec();
 }
