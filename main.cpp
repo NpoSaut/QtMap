@@ -68,6 +68,11 @@ void getParamsFromConsole ()
             out << "Longitude: " << systemState->getLongitude()
                 << "; Lattitude: " << systemState->getLatitude() << endl;
         }
+        else if (cmd.at(0) == "c")
+        {
+            systemState->setLight( cmd.at(1).toInt() );
+            out << "Liht: " << systemState->getLight() << endl;
+        }
         else
         {
             out << "! unknown command. Try this: s r map property g" << endl;
