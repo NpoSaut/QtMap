@@ -4,7 +4,10 @@
 #include "qtconcurrentrun.h"
 #include <QTextStream>
 
+#ifdef WITH_CAN
 #include "sktcanl/src/sktcanl.h"
+#endif
+
 #include <iostream>
 
 SystemStateViewModel *systemState ;
@@ -53,6 +56,7 @@ void getDateTime (int* h, int* m, int* s)
     systemState->setTime(date);
 }
 
+#ifdef WITH_CAN
 //extern void aFunction();
 //QFuture<void> future = QtConcurrent::run(aFunction);
 void getParamsFromCan ()
@@ -65,6 +69,7 @@ void getParamsFromCan ()
         sktcanl_read_can_msg();
     }
 }
+#endif
 
 void getParamsFromConsole ()
 {
@@ -133,17 +138,20 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QmlApplicationViewer viewer;
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
     viewer.setMainQmlFile(QLatin1String("qml/QtMon/main.qml"));
-#ifdef QT_DEBUG
-    viewer.showExpanded();
-#else
+#ifdef ON_DEVICE
     viewer.showFullScreen();
+#else
+    viewer.showExpanded();
 #endif
 
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
 
-//    QtConcurrent::run(getParamsFromConsole);
+#ifdef WITH_CAN
     QtConcurrent::run(getParamsFromCan);
+#else
+    QtConcurrent::run(getParamsFromConsole);
+#endif
 
     return app->exec();
 }
