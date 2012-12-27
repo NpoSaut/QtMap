@@ -124,7 +124,7 @@ void getParamsFromConsole ()
         }
         else
         {
-            out << "! unknown command. Try this: s r map property g" << endl;
+            out << "! unknown command. Try this: s r map property g c a" << endl;
         }
     }
 }
