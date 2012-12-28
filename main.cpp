@@ -24,7 +24,7 @@ void getSpeedLimits (int* val)
 
 void getLights (int* code)
 {
-    systemState->setLight(*code);
+    systemState->setLight(*code-1);
 }
 
 void getAlsn (int* code)
