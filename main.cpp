@@ -112,6 +112,16 @@ void getParamsFromConsole ()
             out << "Longitude: " << systemState->getLongitude()
                 << "; Lattitude: " << systemState->getLatitude() << endl;
         }
+        else if (cmd.at(0) == "gg")
+        {
+            if (cmd.size() == 3)
+            {
+                systemState->setLongitude(systemState->getLongitude() + cmd.at(1).toDouble() );
+                systemState->setLatitude(systemState->getLatitude() + cmd.at(2).toDouble() );
+            }
+            out << "Longitude: " << systemState->getLongitude()
+                << "; Lattitude: " << systemState->getLatitude() << endl;
+        }
         else if (cmd.at(0) == "c")
         {
             systemState->setLight( cmd.at(1).toInt() );
