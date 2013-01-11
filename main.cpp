@@ -24,7 +24,7 @@ void getSpeedLimits (int* val)
 
 void getLights (int* code)
 {
-    systemState->setLight(*code);
+    systemState->setLight(*code-1);
 }
 
 void getAlsn (int* code)
@@ -134,7 +134,7 @@ void getParamsFromConsole ()
         }
         else
         {
-            out << "! unknown command. Try this: s r map property g" << endl;
+            out << "! unknown command. Try this: s r map property g c a" << endl;
         }
     }
 }
