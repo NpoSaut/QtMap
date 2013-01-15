@@ -5,14 +5,16 @@
 #include <QTextStream>
 
 #ifdef WITH_CAN
-#include "sktcanl/src/sktcanl.h"
+#include "iodrv/iodrv.h"
 #endif
 
 #include <iostream>
 
 SystemStateViewModel *systemState ;
+iodrv* iodriver;
 
-void getSpeed (double* speed)
+
+/*void getSpeed (double* speed)
 {
     systemState->setSpeed( int(*speed) );
 }
@@ -54,12 +56,12 @@ void getDateTime (int* h, int* m, int* s)
 {
     QString date = QString("%1:%2:%3").arg(*h).arg(*m).arg(*s);
     systemState->setTime(date);
-}
+}*/
 
 #ifdef WITH_CAN
 //extern void aFunction();
 //QFuture<void> future = QtConcurrent::run(aFunction);
-void getParamsFromCan ()
+/*void getParamsFromCan ()
 {
     sktcanl_init();
     sktcanl_set_callbacks(getSpeed, getSpeedLimits, NULL, NULL, getLights, getAlsn, getMilage, NULL, NULL, getGps, getDateTime);
@@ -68,7 +70,7 @@ void getParamsFromCan ()
     {
         sktcanl_read_can_msg();
     }
-}
+}*/
 #endif
 
 void getParamsFromConsole ()
@@ -158,7 +160,26 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     systemState = object->findChild<SystemStateViewModel*>("stateView");
 
 #ifdef WITH_CAN
-    QtConcurrent::run(getParamsFromCan);
+    //QtConcurrent::run(getParamsFromCan);
+    // Здесь подключаюсь я.
+    iodriver = new iodrv();
+
+    QObject::connect(iodriver, SIGNAL(signal_speed(double)), systemState, SLOT(setSpeed(double)));
+    QObject::connect(iodriver, SIGNAL(signal_speed_limit(int)), systemState, SLOT(setSpeedRestriction(int)));
+    //connect(iodriver, SIGNAL(signal_stop_flag(int)), systemState, SLOT((int)));
+    //connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT((int)));
+    QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
+    QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreq(int)));
+    QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
+    //connect(iodriver, SIGNAL(signal_epv_state(int)), systemState, SLOT((int)));
+    //connect(iodriver, SIGNAL(signal_epv_key(int)), systemState, SLOT((int)));
+    QObject::connect(iodriver, SIGNAL(signal_lat(double)), systemState, SLOT(setLatitud(double)));
+    QObject::connect(iodriver, SIGNAL(signal_lon(double)), systemState, SLOT(setLongitude(double)));
+    QObject::connect(iodriver, SIGNAL(signal_time(QString)), systemState, SLOT(setTime(QString)));
+    QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));
+
+    iodriver->start("vcan0");
+
 #else
     QtConcurrent::run(getParamsFromConsole);
 #endif
