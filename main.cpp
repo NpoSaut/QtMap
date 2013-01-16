@@ -11,8 +11,10 @@
 #include <iostream>
 
 SystemStateViewModel *systemState ;
-iodrv* iodriver;
 
+#ifdef WITH_CAN
+iodrv* iodriver;
+#endif
 
 /*void getSpeed (double* speed)
 {
