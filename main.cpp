@@ -178,9 +178,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_lat(double)), systemState, SLOT(setLatitud(double)));
     QObject::connect(iodriver, SIGNAL(signal_lon(double)), systemState, SLOT(setLongitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_time(QString)), systemState, SLOT(setTime(QString)));
-    QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));
+    QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));    
 
-    iodriver->start("vcan0");
+    iodriver->start(argv[1], (QString(argv[2]).toInt() == 0) ? gps : can);
 
 #else
     QtConcurrent::run(getParamsFromConsole);
