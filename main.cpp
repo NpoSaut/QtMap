@@ -3,6 +3,7 @@
 #include "systemstateviewmodel.h"
 #include "qtconcurrentrun.h"
 #include <QTextStream>
+#include <QTextCodec>
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
@@ -146,6 +147,9 @@ void getParamsFromConsole ()
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QScopedPointer<QApplication> app(createApplication(argc, argv));
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QTextCodec::setCodecForCStrings(codec);
 
     qmlRegisterType<SystemStateViewModel>("views", 1, 0, "SystemStateView");
 
