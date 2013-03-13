@@ -167,18 +167,27 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 #ifdef WITH_CAN
     //QtConcurrent::run(getParamsFromCan);
-    // Здесь подключаюсь я.
+    //Здесь подключаюсь я.
     iodriver = new iodrv();
-
+    //Скорость и ограничения
     QObject::connect(iodriver, SIGNAL(signal_speed(double)), systemState, SLOT(setSpeed(double)));
     QObject::connect(iodriver, SIGNAL(signal_speed_limit(int)), systemState, SLOT(setSpeedRestriction(int)));
-    //connect(iodriver, SIGNAL(signal_stop_flag(int)), systemState, SLOT((int)));
-    //connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT((int)));
+    QObject::connect(iodriver, SIGNAL(signal_target_speed(int)), systemState, SLOT(setTargetSpeed(int)));
+    QObject::connect(iodriver, SIGNAL(signal_acceleration(double)), systemState, SLOT(setAcceleration(double)));
+    //Состояние системы
+    QObject::connect(iodriver, SIGNAL(signal_epv_state(int)), systemState, SLOT(setIsEpvReady(bool)));
+    QObject::connect(iodriver, SIGNAL(signal_epv_key(int)), systemState, SLOT(setIsEpvReleased(bool)));
+    //Одометр
+    QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
+    //Светофоры
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreq(int)));
-    QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
-    //connect(iodriver, SIGNAL(signal_epv_state(int)), systemState, SLOT((int)));
-    //connect(iodriver, SIGNAL(signal_epv_key(int)), systemState, SLOT((int)));
+
+    QObject::connect(iodriver, SIGNAL(signal_driving_mode(QString)), systemState, SLOT(setDriveMode(QString)));
+    QObject::connect(iodriver, SIGNAL(signal_vigilance(int)), systemState, SLOT(setIsVigilanceRequired(bool)));
+    QObject::connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT(setDirection(int)));
+    QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(int)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
+
     QObject::connect(iodriver, SIGNAL(signal_lat(double)), systemState, SLOT(setLatitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_lon(double)), systemState, SLOT(setLongitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_time(QString)), systemState, SLOT(setTime(QString)));
