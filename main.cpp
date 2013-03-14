@@ -188,13 +188,26 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT(setDirection(int)));
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(int)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
 
+    QObject::connect(iodriver, SIGNAL(signal_pressure_tc(QString)), systemState, SLOT(setPressureTC(QString)));
+    QObject::connect(iodriver, SIGNAL(signal_pressure_tm(QString)), systemState, SLOT(setPressureTM(QString)));
+
     QObject::connect(iodriver, SIGNAL(signal_lat(double)), systemState, SLOT(setLatitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_lon(double)), systemState, SLOT(setLongitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_time(QString)), systemState, SLOT(setTime(QString)));
     QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));
-    QObject::connect(systemState, SIGNAL(AlsnFreqChanged()), iodriver, SLOT(slot_fkey_down()));
+    // TODO: QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), systemState, SLOT());
 
-    iodriver->start(argv[1], (QString(argv[2]).toInt() == 0) ? gps : can);
+
+
+    QObject::connect(systemState, SIGNAL(AlsnFreqChanged()), iodriver, SLOT(slot_f_key_down()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_down()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_down()));
+
+
+
+    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
 
 #else
     QtConcurrent::run(getParamsFromConsole);
