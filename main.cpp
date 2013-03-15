@@ -134,8 +134,8 @@ void getParamsFromConsole ()
         }
         else if (cmd.at(0) == "a")
         {
-            systemState->setAlsnFreq( cmd.at(1).toInt() );
-            out << "AlsnFreq: " << systemState->getAlsnFreq() << endl;
+            systemState->setAlsnFreqTarget( cmd.at(1).toInt() );
+            out << "AlsnFreqTarget: " << systemState->getAlsnFreqTarget() << endl;
         }
         else
         {
@@ -181,7 +181,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
     //Светофоры
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
-    QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreq(int)));
+    QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreqFact(int)));
 
     QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), systemState, SLOT(setDriveMode(int)));
     QObject::connect(iodriver, SIGNAL(signal_vigilance(int)), systemState, SLOT(setIsVigilanceRequired(bool)));
@@ -199,7 +199,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 
 
-    QObject::connect(systemState, SIGNAL(AlsnFreqChanged()), iodriver, SLOT(slot_f_key_down()));
+    QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_down()));
