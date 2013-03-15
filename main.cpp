@@ -183,7 +183,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreq(int)));
 
-    QObject::connect(iodriver, SIGNAL(signal_driving_mode(QString)), systemState, SLOT(setDriveMode(QString)));
+    QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), systemState, SLOT(setDriveMode(int)));
     QObject::connect(iodriver, SIGNAL(signal_vigilance(int)), systemState, SLOT(setIsVigilanceRequired(bool)));
     QObject::connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT(setDirection(int)));
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(int)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
