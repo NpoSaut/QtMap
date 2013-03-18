@@ -168,7 +168,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #ifdef WITH_CAN
     //QtConcurrent::run(getParamsFromCan);
     //Здесь подключаюсь я.
-    iodriver = new iodrv();
+    iodriver = new iodrv(systemState);
     //Скорость и ограничения
     QObject::connect(iodriver, SIGNAL(signal_speed(double)), systemState, SLOT(setSpeed(double)));
     QObject::connect(iodriver, SIGNAL(signal_speed_limit(int)), systemState, SLOT(setSpeedRestriction(int)));
@@ -200,10 +200,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 
     QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_down()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_down()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_down()));
+    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
+    QObject::connect(systemState, SIGNAL(DriveModeTargetChanged()), iodriver, SLOT(slot_rmp_key_down()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
+    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
 
 
 
