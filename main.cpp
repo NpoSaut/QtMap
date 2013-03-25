@@ -205,8 +205,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
 
-
-
     iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
 
 #else
