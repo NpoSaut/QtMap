@@ -195,9 +195,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_lon(double)), systemState, SLOT(setLongitude(double)));
     QObject::connect(iodriver, SIGNAL(signal_time(QString)), systemState, SLOT(setTime(QString)));
     QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));
-    // TODO: QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), systemState, SLOT());
-
-
+    QObject::connect(iodriver, SIGNAL(signal_ssps_mode(bool)), systemState, SLOT(setPropertyView(bool)));
 
     QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
