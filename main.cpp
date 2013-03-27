@@ -17,6 +17,8 @@ SystemStateViewModel *systemState ;
 iodrv* iodriver;
 #endif
 
+SpeedAgregator* speedAgregator;
+
 /*void getSpeed (double* speed)
 {
     systemState->setSpeed( int(*speed) );
@@ -144,6 +146,8 @@ void getParamsFromConsole ()
     }
 }
 
+
+
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QScopedPointer<QApplication> app(createApplication(argc, argv));
@@ -169,8 +173,17 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     //QtConcurrent::run(getParamsFromCan);
     //Здесь подключаюсь я.
     iodriver = new iodrv(systemState);
+    speedAgregator = new SpeedAgregator();
+
+    // Для отладки
+    QObject::connect(iodriver, SIGNAL(signal_speed_earth(double)), systemState, SLOT(setSpeedFromEarth(double)));
+    QObject::connect(iodriver, SIGNAL(signal_speed_sky(double)), systemState, SLOT(setSpeedFromSky(double)));
+
     //Скорость и ограничения
-    QObject::connect(iodriver, SIGNAL(signal_speed(double)), systemState, SLOT(setSpeed(double)));
+    QObject::connect(iodriver, SIGNAL(signal_speed_earth(double)), speedAgregator, SLOT(getSpeedFromEarth(double)));
+    QObject::connect(iodriver, SIGNAL(signal_speed_sky(double)), speedAgregator, SLOT(getSpeedFromSky(double)));
+    QObject::connect(speedAgregator, SIGNAL(speedChanged(double)), systemState, SLOT(setSpeed(double)));
+    QObject::connect(speedAgregator, SIGNAL(speedIsValidChanged(bool)), systemState, SLOT(setSpeedIsValid(bool)));
     QObject::connect(iodriver, SIGNAL(signal_speed_limit(int)), systemState, SLOT(setSpeedRestriction(int)));
     QObject::connect(iodriver, SIGNAL(signal_target_speed(int)), systemState, SLOT(setTargetSpeed(int)));
     QObject::connect(iodriver, SIGNAL(signal_acceleration(double)), systemState, SLOT(setAcceleration(double)));
