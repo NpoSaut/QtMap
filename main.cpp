@@ -182,6 +182,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     //Скорость и ограничения
     QObject::connect(iodriver, SIGNAL(signal_speed_earth(double)), speedAgregator, SLOT(getSpeedFromEarth(double)));
     QObject::connect(iodriver, SIGNAL(signal_speed_sky(double)), speedAgregator, SLOT(getSpeedFromSky(double)));
+    QObject::connect(iodriver, SIGNAL(signal_ssps_mode(bool)), speedAgregator, SLOT(getIsOnRoad(bool)));
     QObject::connect(speedAgregator, SIGNAL(speedChanged(double)), systemState, SLOT(setSpeed(double)));
     QObject::connect(speedAgregator, SIGNAL(speedIsValidChanged(bool)), systemState, SLOT(setSpeedIsValid(bool)));
     QObject::connect(iodriver, SIGNAL(signal_speed_limit(int)), systemState, SLOT(setSpeedRestriction(int)));
