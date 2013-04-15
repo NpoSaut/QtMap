@@ -15,9 +15,10 @@ SystemStateViewModel *systemState ;
 
 #ifdef WITH_CAN
 iodrv* iodriver;
+SpeedAgregator* speedAgregator;
 #endif
 
-SpeedAgregator* speedAgregator;
+
 
 /*void getSpeed (double* speed)
 {
