@@ -140,6 +140,11 @@ void getParamsFromConsole ()
             systemState->setAlsnFreqTarget( cmd.at(1).toInt() );
             out << "AlsnFreqTarget: " << systemState->getAlsnFreqTarget() << endl;
         }
+        else if (cmd.at(0) == "dm")
+        {
+            systemState->setDriveModeFact( cmd.at(1).toInt() );
+            out << "DriveModeFact: " << systemState->getDriveModeFact() << endl;
+        }
         else
         {
             out << "! unknown command. Try this: s r map property g c a" << endl;
