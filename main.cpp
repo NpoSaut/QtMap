@@ -145,9 +145,15 @@ void getParamsFromConsole ()
             systemState->setDriveModeFact( cmd.at(1).toInt() );
             out << "DriveModeFact: " << systemState->getDriveModeFact() << endl;
         }
+        else if (cmd.at(0) == "iw")
+        {
+            systemState->setIronWheels( cmd.at(1) == "1" );
+            out << "Iron Wheels: " << systemState->getIronWheels() << endl;
+        }
         else
         {
-            out << "! unknown command. Try this: s r map property g c a" << endl;
+            out << "! unknown command. Try this:" << endl;
+            out << "iw {1/0} IronWheels" << endl;
         }
     }
 }
