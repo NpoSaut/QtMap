@@ -141,6 +141,11 @@ void getParamsFromConsole ()
             systemState->setAlsnFreqTarget( cmd.at(1).toInt() );
             out << "AlsnFreqTarget: " << systemState->getAlsnFreqTarget() << endl;
         }
+        else if (cmd.at(0) == "epv")
+        {
+            systemState->setIsEpvReady( cmd.at(1) == "1" );
+            out << "IsEpvReady: " << systemState->getIsEpvReady() << endl;
+        }
         else if (cmd.at(0) == "dm")
         {
             systemState->setDriveModeFact( cmd.at(1).toInt() );
