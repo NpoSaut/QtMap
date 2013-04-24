@@ -162,11 +162,18 @@ void getParamsFromConsole ()
             systemState->setIsTractionOn( cmd.at(1) == "1" );
             out << "Traction is: " << systemState->getIsTractionOn() << endl;
         }
+        // Направление движения
+        else if (cmd.at(0) == "dir")
+        {
+            systemState->setDirection( cmd.at(1).toInt() );
+            out << "Now Direction is: " << systemState->getDirection() << endl;
+        }
         else
         {
             out << "! unknown command. Try this:" << endl;
             out << "iw {1/0} IronWheels" << endl;
             out << "tr {1/0} Тяга: вкл/выкл" << endl;
+            out << "dir {1/-1/0} Направление движения: вперёд/назад/стоим" << endl;
         }
     }
 }
