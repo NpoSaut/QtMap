@@ -156,10 +156,17 @@ void getParamsFromConsole ()
             systemState->setIronWheels( cmd.at(1) == "1" );
             out << "Iron Wheels: " << systemState->getIronWheels() << endl;
         }
+        // Тяга
+        else if (cmd.at(0) == "tr")
+        {
+            systemState->setIsTractionOn( cmd.at(1) == "1" );
+            out << "Traction is: " << systemState->getIsTractionOn() << endl;
+        }
         else
         {
             out << "! unknown command. Try this:" << endl;
             out << "iw {1/0} IronWheels" << endl;
+            out << "tr {1/0} Тяга: вкл/выкл" << endl;
         }
     }
 }
