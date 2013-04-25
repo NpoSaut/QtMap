@@ -146,6 +146,11 @@ void getParamsFromConsole ()
             systemState->setIsEpvReady( cmd.at(1) == "1" );
             out << "IsEpvReady: " << systemState->getIsEpvReady() << endl;
         }
+        else if (cmd.at(0) == "b")
+        {
+            systemState->setIsEpvReleased( cmd.at(1) == "1" );
+            out << "IsEpvReady: " << systemState->getIsEpvReleased() << endl;
+        }
         else if (cmd.at(0) == "dm")
         {
             systemState->setDriveModeFact( cmd.at(1).toInt() );
@@ -171,6 +176,8 @@ void getParamsFromConsole ()
         else
         {
             out << "! unknown command. Try this:" << endl;
+            out << "epb {1/0} Ключ ЭПК: вкл/выкл" << endl;
+            out << "b {1/0} Экстренное торможение: вкл/выкл" << endl;
             out << "iw {1/0} IronWheels" << endl;
             out << "tr {1/0} Тяга: вкл/выкл" << endl;
             out << "dir {1/-1/0} Направление движения: вперёд/назад/стоим" << endl;
