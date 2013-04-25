@@ -101,16 +101,6 @@ void getParamsFromConsole ()
             systemState->setSpeedRestriction( cmd.at(1).toInt() );
             out << "Speed restriction: " << systemState->getSpeedRestriction() << endl;
         }
-        else if (cmd.at(0) == "map")
-        {
-            systemState->setPropertyView(false);
-            out << "PropertyView mode: " << systemState->getPropertyView() << endl;
-        }
-        else if (cmd.at(0) == "property")
-        {
-            systemState->setPropertyView(true);
-            out << "PropertyView mode: " << systemState->getPropertyView() << endl;
-        }
         else if (cmd.at(0) == "g")
         {
             if (cmd.size() == 3)
@@ -156,6 +146,11 @@ void getParamsFromConsole ()
             systemState->setDriveModeFact( cmd.at(1).toInt() );
             out << "DriveModeFact: " << systemState->getDriveModeFact() << endl;
         }
+        else if (cmd.at(0) == "tdm")
+        {
+            systemState->setDriveModeTarget( cmd.at(1).toInt() );
+            out << "DriveModeTarget: " << systemState->getDriveModeTarget() << endl;
+        }
         else if (cmd.at(0) == "iw")
         {
             systemState->setIronWheels( cmd.at(1) == "1" );
@@ -176,6 +171,8 @@ void getParamsFromConsole ()
         else
         {
             out << "! unknown command. Try this:" << endl;
+            out << "tdm {0/1/2/3/4} Целевой режим движения: П/М/Р/Д/Т" << endl;
+            out << "dm {0/1/2/3/4} Фактический режим движения: П/М/Р/Д/Т" << endl;
             out << "epb {1/0} Ключ ЭПК: вкл/выкл" << endl;
             out << "b {1/0} Экстренное торможение: вкл/выкл" << endl;
             out << "iw {1/0} IronWheels" << endl;
@@ -268,7 +265,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_date(QString)), systemState, SLOT(setDate(QString)));
 
     QObject::connect(iodriver, SIGNAL(signal_traction(bool)), systemState, SLOT(setIsTractionOn(bool)));
-    QObject::connect(iodriver, SIGNAL(signal_is_on_road(bool)), systemState, SLOT(setPropertyView(bool)));
 
     //QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
