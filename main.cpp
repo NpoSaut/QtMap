@@ -168,6 +168,16 @@ void getParamsFromConsole ()
             systemState->setDirection( cmd.at(1).toInt() );
             out << "Now Direction is: " << systemState->getDirection() << endl;
         }
+        else if (cmd.at(0) == "wt")
+        {
+            systemState->setWarningText( cmd.at(1) );
+            out << "Now Warning Text is: " << systemState->getWarningText() << endl;
+        }
+        else if (cmd.at(0) == "it")
+        {
+            systemState->setInfoText( cmd.at(1) );
+            out << "Now Info Text is: " << systemState->getInfoText() << endl;
+        }
         else
         {
             out << "! unknown command. Try this:" << endl;
@@ -178,6 +188,8 @@ void getParamsFromConsole ()
             out << "iw {1/0} IronWheels" << endl;
             out << "tr {1/0} Тяга: вкл/выкл" << endl;
             out << "dir {1/-1/0} Направление движения: вперёд/назад/стоим" << endl;
+            out << "wt {text} Текст предупреждения" << endl;
+            out << "it {text} Текст совета" << endl;
         }
     }
 }
