@@ -207,6 +207,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QmlApplicationViewer viewer;
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
+    //app->setFont(QFont("URW Gothic L"));
     viewer.setMainQmlFile(QLatin1String("qml/QtMon/main.qml"));
 #ifdef ON_DEVICE
     viewer.showFullScreen();
