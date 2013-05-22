@@ -4,6 +4,7 @@
 #include "qtconcurrentrun.h"
 #include <QTextStream>
 #include <QTextCodec>
+#include "electroincmap.h"
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
@@ -295,6 +296,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #else
     QtConcurrent::run(getParamsFromConsole);
 #endif
+
+    ElectroincMap elMap;
+    elMap.load ("./map.gps");
 
     return app->exec();
 }

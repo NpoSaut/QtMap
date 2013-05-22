@@ -1,6 +1,7 @@
 #include "electroincmap.h"
 #include "emap/kilometerpost.h"
 #include "emap/routesection.h"
+#include "QFile"
 
 #include "vector"
 
@@ -16,22 +17,27 @@ ElectroincMap::ElectroincMap(QObject *parent) :
 // Загрузка электронной карты из файла
 void ElectroincMap::load(QString fileName)
 {
-    vector<char> data;
+    QFile mapFile (fileName);
+    mapFile.open(QIODevice::ReadOnly);
+    QByteArray data = mapFile.readAll ();
 
     // Количество столбок
     int postsCount = data[2] | data[3] << 8;
 
-    sections.push_back(*(new RouteSection()));
+    RouteSection section;
     // Считываем столбы
     for (int i = 0; i < postsCount; i++)
     {
         KilometerPost currentPost = KilometerPost::loadFrom(data, 9, i);
         allPosts.push_back(currentPost);
-        if (currentPost.position == kpp_start)
+        section.Posts.push_back(currentPost);
+
+        if (currentPost.position == kpp_end)
         {
-            sections.push_back(*(new RouteSection()));
+            sections.push_back(section);
+            RouteSection empty;
+            section = empty;
         }
-        sections.end()->Posts.push_back(currentPost);
     }
 }
 

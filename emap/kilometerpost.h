@@ -1,6 +1,8 @@
 #ifndef KILOMETERPOST_H
 #define KILOMETERPOST_H
 
+#include "QByteArray"
+
 #include "vector"
 using namespace std;
 
@@ -14,7 +16,7 @@ public:
     double lon;
     double ordinate;
     KilometerPostPosition position;
-    static KilometerPost loadFrom(const vector<char> & data, int offset, int index);
+    static KilometerPost loadFrom(const QByteArray& data, int offset, int index);
 };
 
 #endif // KILOMETERPOST_H
