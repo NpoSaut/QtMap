@@ -8,23 +8,43 @@
 class ElectroincMap : public QObject
 {
     Q_OBJECT
-public:
-    explicit ElectroincMap(QObject *parent = 0);
-    void load(QString fileName);
 
-signals:
-
-public slots:
-    void setMetrometer(double value);
-    void checkMap(double lat, double lon);
 
 private:
     vector<KilometerPost> allPosts;
     list<RouteSection> sections;
 
-    vector<KilometerPost> getPostsInArea(double radius);
+    list<KilometerPost> nearPosts;
+    KilometerPost targetPost;
+    KilometerPost departPost;
+
+    list<KilometerPost> getPostsInArea(double lat, double lon, double radius);
 
     double x;
+
+    class ApproachingPoint
+    {
+    public:
+        double x;
+        double r;
+    };
+    list<ApproachingPoint> aPoints;
+    double minimalApproach;
+
+    vector<ApproachingPoint> getExtremumApproaches();
+
+    double parabolizeX(vector<ApproachingPoint> aprs);
+
+public:
+    explicit ElectroincMap(QObject *parent = 0);
+    void load(QString fileName);
+
+signals:
+    void onPostDetected(KilometerPost post, double x);
+
+public slots:
+    void setMetrometer(double value);
+    void checkMap(double lat, double lon);
 };
 
 #endif // ELECTROINCMAP_H

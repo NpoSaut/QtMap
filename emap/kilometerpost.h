@@ -16,7 +16,25 @@ public:
     double lon;
     double ordinate;
     KilometerPostPosition position;
+
+    double distanceTo(double to_lat, double to_lon);
+    double estimateDistanceTo(KilometerPost p2);
+    double estimateDistanceTo(double to_lat, double to_lon);
+
+
     static KilometerPost loadFrom(const QByteArray& data, int offset, int index);
+
+    static double distanceBetween(KilometerPost p1, KilometerPost p2);
+    static double estimateDistances(KilometerPost p1, KilometerPost p2);
+    static double estimateDistances(double lat1, double lon1, double lat2, double lon2);
+    static double metersToEstimation(double meters);
+
+    inline bool operator == (const KilometerPost &p)    { return id == p.id; }
+    inline bool operator != (const KilometerPost &p)    { return !(*this == p); }
+
+private:
+    int id;
+
 };
 
 #endif // KILOMETERPOST_H
