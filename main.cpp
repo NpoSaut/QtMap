@@ -809,10 +809,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 
     elMap.load ("./map.gps");
-    for (int i = 0; i < 496; i ++)
+    elMap.setTrackNumber(2);
+    for (int i = 0; i < /*496*/ 30; i ++)
     {
         elMap.setMetrometer (coords[i][2]);
         elMap.checkMap (coords[i][0], coords[i][1]);
+        //getc(stdin);
     }
 
     return app->exec();

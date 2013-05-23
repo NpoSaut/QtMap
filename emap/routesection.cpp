@@ -1,5 +1,6 @@
 #include "routesection.h"
 
-RouteSection::RouteSection()
+RouteSection::RouteSection(int id)
 {
+    RouteSection::id = id;
 }
