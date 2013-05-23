@@ -63,7 +63,7 @@ void ElectroincMap::checkMap(double lat, double lon)
     {
         if (p != departPost)
         {
-            double d = p.estimateDistanceTo(lat, lon);
+            double d = p.distanceTo(lat, lon);
             if (d < closestDist)
             {
                 closestPost = p;
@@ -104,7 +104,7 @@ void ElectroincMap::checkMap(double lat, double lon)
             minimalApproach = 1e20;
 
             // Трубим
-            onPostDetected(targetPost, x);
+            emit onPostDetected(targetPost, x);
 
             departPost = targetPost;
         }
@@ -125,7 +125,8 @@ list<KilometerPost> ElectroincMap::getPostsInArea(double lat, double lon, double
     for (int i = 0; i < allPosts.size(); i++)
     {
         KilometerPost p = allPosts[i];
-        if (p.estimateDistanceTo(lat, lon) <= radiusEstimation)
+        //if (p.estimateDistanceTo(lat, lon) <= radiusEstimation)
+        if (p.distanceTo (lat, lon) <= radius)
         {
             res.push_back(p);
         }

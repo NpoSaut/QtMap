@@ -3,7 +3,7 @@
 #include "math.h"
 
 #define MATH_PI 3.1415926535897932384626433832795
-#define EARTH_RADIUS 6372795
+#define EARTH_RADIUS 6371000
 
 // Представление километрового столба
 KilometerPost::KilometerPost()
@@ -12,7 +12,7 @@ KilometerPost::KilometerPost()
 
 double KilometerPost::distanceTo(double to_lat, double to_lon)
 {
-    return estimateDistances(lat, lon, to_lat, to_lon);
+    return distanceBetween(lat, lon, to_lat, to_lon);
 }
 
 double KilometerPost::estimateDistanceTo(KilometerPost p2)
@@ -23,6 +23,11 @@ double KilometerPost::estimateDistanceTo(KilometerPost p2)
 double KilometerPost::estimateDistanceTo(double to_lat, double to_lon)
 {
     return estimateDistances(lat, lon, to_lat, to_lon);
+}
+
+double KilometerPost::radian(double gradus)
+{
+    return gradus * MATH_PI / 180;
 }
 
 // Структура, описывающая формат хранение электронного столба
@@ -58,10 +63,16 @@ KilometerPost KilometerPost::loadFrom(const QByteArray& data, int offset, int in
     return kp;
 }
 
+
 double KilometerPost::distanceBetween(KilometerPost p1, KilometerPost p2)
 {
-    return EARTH_RADIUS * 2 * asin(sqrt(estimateDistances(p1, p2)));
+    return distanceBetween(p1.lat, p1.lon, p2.lat, p2.lon);
 }
+double KilometerPost::distanceBetween(double lat1, double lon1, double lat2, double lon2)
+{
+    return EARTH_RADIUS * 2 * asin(pow(estimateDistances(lat1, lon1, lat2, lon2), 0.5));
+}
+
 
 double KilometerPost::estimateDistances(KilometerPost p1, KilometerPost p2)
 {
@@ -70,7 +81,7 @@ double KilometerPost::estimateDistances(KilometerPost p1, KilometerPost p2)
 
 double KilometerPost::estimateDistances(double lat1, double lon1, double lat2, double lon2)
 {
-    return pow(sin((lat2 - lat1) / 2), 2) + cos(lat1) * cos(lat2) * pow(sin(lon2 - lon1), 2);
+    return pow(sin(radian(lat2 - lat1) / 2), 2) + cos(radian(lat1)) * cos(radian(lat2)) * pow(sin(radian(lon2 - lon1) / 2), 2);
 }
 
 double KilometerPost::metersToEstimation(double meters)
