@@ -82,7 +82,7 @@ void getDateTime (int* h, int* m, int* s)
 }*/
 #endif
 
-ElectroincMap elMap;
+Navigation::ElectroincMap elMap;
 
 double coords[][3] = {
     { 55.660824, 37.716284, 0 },

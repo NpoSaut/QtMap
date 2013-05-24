@@ -1,9 +1,13 @@
 #ifndef ROUTESECTION_H
 #define ROUTESECTION_H
 
-#include "vector"
+#include <vector>
+
+#include "almanac.h"
 #include "kilometerpost.h"
 
+namespace Navigation
+{
 
 class RouteSection
 {
@@ -16,5 +20,7 @@ public:
 
     int id;
 };
+
+}
 
 #endif // ROUTESECTION_H

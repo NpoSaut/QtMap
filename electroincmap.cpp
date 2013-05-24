@@ -1,13 +1,15 @@
+#include <vector>
+
+#include <QFile>
+
 #include "electroincmap.h"
-#include "emap/kilometerpost.h"
-#include "emap/routesection.h"
-#include "QFile"
+
+using namespace Navigation;
 #include <QDebug>
 
 #define D_foreach(l, T, itr) for (list<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 #define D_foreach_vec(l, T, itr) for (vector<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 
-#include "vector"
 
 using namespace std;
 
@@ -164,7 +166,7 @@ void ElectroincMap::syncPostApproaches(list<KilometerPost> posts)
 KilometerPost &ElectroincMap::projectNextPost(KilometerPost forPost)
 {
     int direction = forPost.direction;
-    KilometerPost &res = KilometerPost();
+    KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
     D_foreach(nearPosts, KilometerPost, kpi)
     {
@@ -175,11 +177,11 @@ KilometerPost &ElectroincMap::projectNextPost(KilometerPost forPost)
             if (ordinateShift > 0 && ordinateShift < shiftToRes)
             {
                 shiftToRes = ordinateShift;
-                res = kp;
+                res = &kp;
             }
         }
     }
-    return res;
+    return *res;
 }
 
 
