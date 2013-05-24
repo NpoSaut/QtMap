@@ -1,23 +1,23 @@
-#include "object.h"
+#include "railobject.h"
 
 using namespace Navigation;
 
-Object Object::loadRawData(QByteArray rawData, int offset, int index)
+RailObject RailObject::loadFrom(QByteArray rawData, int offset, int index)
 {
     RawObjectData &data = *((RawObjectData*) (rawData.data () + offset + index * rawObjectDataSize));
 
-    Object obj;
+    RailObject obj;
 
-    obj.zdOrdinate = data.zdOrdinate;
+    obj.ordinate = data.ordinate;
 
     switch (data.type) {
-    case Flashlight:
+    case TrafficLight:
         obj.length = data.length;
-        obj.pullupForFreightTrain = data.pullupForFreightTrain;
+        obj.pullforthForFreightTrain = data.pullforthForFreightTrain;
         obj.alsEn = data.alsEn;
-        obj.pullupForPassengerTrain = data.pullupForPassengerTrain;
+        obj.pullforthForPassengerTrain = data.pullforthForPassengerTrain;
         obj.conditionallyAllowForFreightTrain = data.radioOrConditionallyAllow;
-        obj.speedLimit = data.speedLimit;
+        obj.speedRestriction = data.speedRestriction;
         obj.alsnFreq = data.alsnFreq;
         obj.name = QString(*(((char *) &data) + 10));
         break;

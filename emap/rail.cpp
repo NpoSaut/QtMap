@@ -2,7 +2,7 @@
 
 using namespace Navigation;
 
-Rail Rail::loadRawData(QByteArray rawData, int offset, int index)
+Rail Rail::loadFrom(QByteArray rawData, int offset, int index)
 {
 
 }

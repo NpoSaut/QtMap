@@ -9,46 +9,46 @@
 namespace Navigation
 {
 
-class Object
+class RailObject
 {
 public:
-    Object ()
-        : parentRail (nullptr), zdOrdinate (0)
+    RailObject ()
+        : parentRail (nullptr), ordinate (0)
     {}
 
-    static Object loadRawData (QByteArray rawData, int offset, int index);
+    static RailObject loadFrom (QByteArray rawData, int offset, int index);
 
-    void setParentRoad (Rail *parentRail) { Object::parentRail = parentRail; }
+    void setParentRoad (Rail *parentRail) { RailObject::parentRail = parentRail; }
     Rail *getParentRail () const { return parentRail; }
 
-    int getZdOrdinate () const { return zdOrdinate; }
-    int calcDistance (int currentZdOrdinate) const { return zdOrdinate - currentZdOrdinate; }
+    int getOrdinate () const { return ordinate; }
+    int calcDistance (int currentRwOrdinate) const { return ordinate - currentRwOrdinate; }
 
     int getAlsnFreq () const { return alsnFreq; }
     bool isAlsEn () const { return alsEn; }
     int getLength () const { return length; }
-    int getSpeedLimit () const { return speedLimit; }
+    int getSpeedRestriction () const { return speedRestriction; }
     bool isConditionallyAllowForFreightTrain () const { return conditionallyAllowForFreightTrain; }
     bool isRadioChannel () const { return radioChannel; }
-    bool isPullupForFreightTrain () const { return pullupForFreightTrain; }
-    bool isPullupForPassengerTrain () const { return pullupForPassengerTrain; }
+    bool isPullforthForFreightTrain () const { return pullforthForFreightTrain; }
+    bool isPullforthForPassengerTrain () const { return pullforthForPassengerTrain; }
     QString getName () const { return name; }
 
 private:
     Rail *parentRail;
-    int zdOrdinate;
+    int ordinate;
 
     int alsnFreq;
     bool alsEn;
     int length;
-    int speedLimit;
+    int speedRestriction;
     bool conditionallyAllowForFreightTrain;
     bool radioChannel;
-    bool pullupForFreightTrain;
-    bool pullupForPassengerTrain;
+    bool pullforthForFreightTrain;
+    bool pullforthForPassengerTrain;
     QString name;
 
-    enum OjectType { Flashlight = 1, Station = 2, DangerousPlace = 3, Bridge = 4,
+    enum OjectType { TrafficLight = 1, Station = 2, DangerousPlace = 3, Bridge = 4,
                      Crossing = 5, Platform = 6, Tunnel = 7,  Switch = 8,
                      Tks = 9, GpuSaut = 10, DeadEnd = 11 };
 
@@ -59,14 +59,14 @@ private:
         unsigned int                            :8;     // 3
 
         unsigned int                            :4;     // 4
-        unsigned int pullupForFreightTrain      :1;
+        unsigned int pullforthForFreightTrain   :1;
         unsigned int alsEn                      :1;
-        unsigned int pullupForPassengerTrain    :1;
+        unsigned int pullforthForPassengerTrain :1;
         unsigned int radioOrConditionallyAllow  :1;
 
-        unsigned int speedLimit                 :8;     // 5
+        unsigned int speedRestriction           :8;     // 5
         unsigned int alsnFreq                   :8;     // 6
-        unsigned int zdOrdinate                 :8*3;   // 7
+        unsigned int ordinate                   :8*3;   // 7
         unsigned int name                       :8*8;
         unsigned int                            :8*2;
     };

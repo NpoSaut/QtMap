@@ -4,7 +4,7 @@
 namespace Navigation
 {
 
-class Object;
+class RailObject;
 class Rail;
 class KilometerPost;
 

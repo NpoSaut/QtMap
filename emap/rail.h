@@ -7,7 +7,7 @@ using namespace std;
 #include <QByteArray>
 
 #include "almanac.h"
-#include "object.h"
+#include "railobject.h"
 
 namespace Navigation
 {
@@ -18,17 +18,17 @@ public:
     Rail ()
     {}
 
-    static Rail loadRawData (QByteArray rawData, int offset, int index);
+    static Rail loadFrom (QByteArray rawData, int offset, int index);
 
-    void setParentKilometerPostNumber (int kilometerPostNumber) { Rail::parentKilometerPostNumber = kilometerPostNumber; }
-    int getParentKilometerPost () const { return parentKilometerPostNumber; }
+    void setKilometerPost (KilometerPost *kilometerPost) { Rail::kilometerPost = kilometerPost; }
+    KilometerPost *getKilometerPost () const { return kilometerPost; }
 
-    const vector<Object> &getObjects () const { return objects; }
+    const vector<RailObject> &getObjects () const { return objects; }
     int getNumber () const { return number; }
 
 private:
-    int parentKilometerPostNumber;
-    vector<Object> objects;
+    KilometerPost *kilometerPost;
+    vector<RailObject> objects;
     int number;
 
     struct RawRoadData
