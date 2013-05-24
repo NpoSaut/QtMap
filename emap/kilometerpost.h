@@ -1,10 +1,15 @@
 #ifndef KILOMETERPOST_H
 #define KILOMETERPOST_H
 
-#include "QByteArray"
-
-#include "vector"
+#include <vector>
 using namespace std;
+
+#include <QByteArray>
+
+#include "almanac.h"
+
+namespace Navigation
+{
 
 enum KilometerPostPosition { kpp_start = 1, kpp_middle = 0, kpp_end = 2 };
 
@@ -37,5 +42,7 @@ private:
     int id;
 
 };
+
+}
 
 #endif // KILOMETERPOST_H

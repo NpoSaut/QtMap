@@ -1,9 +1,18 @@
 #ifndef ELECTROINCMAP_H
 #define ELECTROINCMAP_H
 
-#include "emap/routesection.h"
+#include <vector>
+
 #include <QObject>
-#include "vector"
+#include <QString>
+#include <QByteArray>
+
+#include "emap/almanac.h"
+#include "emap/routesection.h"
+#include "emap/kilometerpost.h"
+
+namespace Navigation
+{
 
 class ElectroincMap : public QObject
 {
@@ -46,5 +55,7 @@ public slots:
     void setMetrometer(double value);
     void checkMap(double lat, double lon);
 };
+
+}
 
 #endif // ELECTROINCMAP_H

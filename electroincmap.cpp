@@ -1,11 +1,13 @@
+#include <vector>
+
+#include <QFile>
+
 #include "electroincmap.h"
-#include "emap/kilometerpost.h"
-#include "emap/routesection.h"
-#include "QFile"
+
+using namespace Navigation;
 
 #define D_foreach(l, T, itr) for (list<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 
-#include "vector"
 
 using namespace std;
 
@@ -161,3 +163,4 @@ double ElectroincMap::parabolizeX(vector<ElectroincMap::ApproachingPoint> aprs)
     double b = (aprs[1].r-aprs[0].r)/(aprs[1].x-aprs[0].x) - a*(aprs[0].x+aprs[1].x);
     return - b / (2 * a);
 }
+

@@ -1,9 +1,12 @@
-#include "kilometerpost.h"
-
 #include "math.h"
 
 #define MATH_PI 3.1415926535897932384626433832795
 #define EARTH_RADIUS 6371000
+
+#include "kilometerpost.h"
+
+using namespace Navigation;
+
 
 // Представление километрового столба
 KilometerPost::KilometerPost()
