@@ -19,8 +19,6 @@ SpeedAgregator* speedAgregator;
 rmp_key_handler* rmp_key_hdlr;
 #endif
 
-
-
 /*void getSpeed (double* speed)
 {
     systemState->setSpeed( int(*speed) );
@@ -257,6 +255,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     //Состояние системы
     QObject::connect(iodriver, SIGNAL(signal_epv_key(bool)), systemState, SLOT(setIsEpvReady(bool)));
     QObject::connect(iodriver, SIGNAL(signal_epv_released(bool)), systemState, SLOT(setIsEpvReleased(bool)));
+    QObject::connect (iodriver, SIGNAL(signal_modules_activity(QString)), systemState, SLOT(setModulesActivityString(QString)));
     //Одометр
     QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
     //Светофоры
@@ -290,7 +289,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
 
-    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
+    iodriver->start("can0", "can1", gps);
 
 #else
     QtConcurrent::run(getParamsFromConsole);
