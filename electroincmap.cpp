@@ -31,20 +31,20 @@ void ElectroincMap::load(QString fileName)
     int postsCount = data[2] | data[3] << 8;
 
     int sectionId = 1;
-    RouteSection section(sectionId);
+    RouteSection *section = new RouteSection(sectionId);
     // Считываем столбы
     for (int i = 0; i < postsCount; i++)
     {
-        KilometerPost currentPost = KilometerPost::loadFrom(data, 9, i);
+        KilometerPost *currentPost = KilometerPost::loadFrom(data, 9, i);
         allPosts.push_back(currentPost);
-        section.Posts.push_back(currentPost);
-        currentPost.sectionId = sectionId;
+        section->posts.push_back(currentPost);
 
-        if (currentPost.position == kpp_end)
+        currentPost->sectionId = sectionId;
+
+        if (currentPost->position == kpp_end)
         {
             sections.push_back(section);
-            RouteSection empty(sectionId);
-            section = empty;
+            section = new RouteSection(sectionId);
         }
     }
 }
@@ -64,80 +64,22 @@ void ElectroincMap::setTrackNumber(int value)
 
 void ElectroincMap::checkMap(double lat, double lon)
 {
-    qDebug() << " lat " << lat << "  lon " << lon << "    x " << x;
-
-    nearPosts = getPostsInArea(lat, lon, 10000);
-
-    // Находим ближайший километровый столб (за исключением "столба отправления")
-    KilometerPost closestPost;
-    double closestDist = 1e20;
-    foreach (KilometerPost p, nearPosts)
-    {
-        if (p != departPost)
-        {
-            double d = p.distanceTo(lat, lon);
-            if (d < closestDist)
-            {
-                closestPost = p;
-                closestDist = d;
-            }
-        }
-    }
-
-    // Находим ближайшие столбы
-    list<KilometerPost> nextPosts = getPostsInArea(lat, lon, 3000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
-
-    nextPosts.remove(departPost);       // Удаляем оттуда столб отправления
-    syncPostApproaches(nextPosts);      // И синхронизируем список приближений
-
-    // Вычисляем приближения для всех точек
-    //foreach (PostApproach pa, postApproaches) {
-    D_foreach(postApproaches, PostApproach, pait)
-    {
-        PostApproach &pa = *pait;
-        // Добавляем текущую точку приближения
-        ApproachingPoint ap;
-        ap.x = x;   ap.r = pa.post.distanceTo(lat, lon);
-        bool ready = pa.pushApproaching(ap);
-        qDebug() << "   post " << pa.post.ordinate << "\tdist " << pa.minimalApproach << "\tfrom " << pa.aPoints.size() << " points";
-        if (pa.achived && pa.post == closestPost)
-        {
-            // Трубим
-            emit onPostDetected(pa.post, pa.getX());
-
-            qDebug() << "FIXED TO POST: " << pa.post.ordinate << "m   x: " << pa.getX();
-
-            departPost = targetPost;
-
-            KilometerPost ttt = projectNextPost(departPost);
-            qDebug() << "NEXT: " << ttt.ordinate << endl << endl;
-            break;
-        }
-    }
-
-    // Если ближайший столб равен целевому столбу (т.е. цель движения не изменилась)
-    if (targetPost == closestPost)
-    {
-    }
-    else
-    {
-        targetPost = closestPost;
-    }
+    // !-!_!-!! ВСЁ ПЕРЕЛАПАТИТЬ !!-!_!-!
 }
 
 // Возвращает все километровые солбы в указанном радиусе
-list<KilometerPost> ElectroincMap::getPostsInArea(double lat, double lon, double radius)
+list<KilometerPost *> ElectroincMap::getPostsInArea(double lat, double lon, double radius)
 {
     return getPostsInArea(allPosts, lat, lon, radius);
 }
-list<KilometerPost> ElectroincMap::getPostsInArea(vector<KilometerPost> source, double lat, double lon, double radius)
+list<KilometerPost *> ElectroincMap::getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius)
 {
-    list<KilometerPost> res;
+    list<KilometerPost *> res;
 
     double radiusEstimation = KilometerPost::metersToEstimation(radius);
-    foreach (KilometerPost p, source) {
+    foreach (KilometerPost *p, source) {
         //if (p.estimateDistanceTo(lat, lon) <= radiusEstimation)
-        if (p.distanceTo (lat, lon) <= radius)
+        if (p->distanceTo (lat, lon) <= radius)
         {
             res.push_back(p);
         }
@@ -145,10 +87,10 @@ list<KilometerPost> ElectroincMap::getPostsInArea(vector<KilometerPost> source, 
     return res;
 }
 
-void ElectroincMap::syncPostApproaches(list<KilometerPost> posts)
+void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
 {
     list<PostApproach> newApproaches;
-    foreach (KilometerPost p, posts) {
+    foreach (KilometerPost *p, posts) {
         PostApproach pa;
         pa.post = p;
         foreach (PostApproach ipa, postApproaches) {
@@ -168,9 +110,9 @@ KilometerPost &ElectroincMap::projectNextPost(KilometerPost forPost)
     int direction = forPost.direction;
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
-    D_foreach(nearPosts, KilometerPost, kpi)
+    D_foreach(nearPosts, KilometerPost *, kpi)
     {
-        KilometerPost &kp = *kpi;
+        KilometerPost &kp = **kpi;
         if (kp.sectionId == forPost.sectionId)
         {
             double ordinateShift = direction * (kp.ordinate - forPost.ordinate);

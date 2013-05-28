@@ -20,15 +20,15 @@ class ElectroincMap : public QObject
 
 
 private:
-    vector<KilometerPost> allPosts;
-    list<RouteSection> sections;
+    vector<KilometerPost *> allPosts;
+    list<RouteSection *> sections;
 
-    list<KilometerPost> nearPosts;
-    KilometerPost targetPost;
-    KilometerPost departPost;
+    list<KilometerPost *> nearPosts;
+    KilometerPost *targetPost;
+    KilometerPost *departPost;
 
-    list<KilometerPost> getPostsInArea(double lat, double lon, double radius);
-    list<KilometerPost> getPostsInArea(vector<KilometerPost> source, double lat, double lon, double radius);
+    list<KilometerPost *> getPostsInArea(double lat, double lon, double radius);
+    list<KilometerPost *> getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius);
 
     double x;
     int trackNumber;
@@ -44,7 +44,7 @@ private:
     {
     public:
         PostApproach();
-        KilometerPost post;
+        KilometerPost *post;
         vector<ApproachingPoint> getExtremumApproaches();
         double parabolizeX(vector<ApproachingPoint> aprs);
         bool pushApproaching(ApproachingPoint p);
@@ -55,7 +55,7 @@ private:
     private:
     };
     list<ElectroincMap::PostApproach> postApproaches;
-    void syncPostApproaches(list<KilometerPost> posts);
+    void syncPostApproaches(list<KilometerPost *> posts);
     KilometerPost &projectNextPost(KilometerPost forPost);
 
 public:

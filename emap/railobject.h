@@ -11,12 +11,13 @@ namespace Navigation
 
 class RailObject
 {
+
 public:
     RailObject ()
         : parentRail (nullptr), ordinate (0)
     {}
 
-    static RailObject loadFrom (QByteArray rawData, int offset, int index);
+    static RailObject *loadFrom (QByteArray rawData, int offset, int index);
 
     void setParentRoad (Rail *parentRail) { RailObject::parentRail = parentRail; }
     Rail *getParentRail () const { return parentRail; }
@@ -24,6 +25,11 @@ public:
     int getOrdinate () const { return ordinate; }
     int calcDistance (int currentRwOrdinate) const { return ordinate - currentRwOrdinate; }
 
+    enum ObjectType { TrafficLight = 1, Station = 2, DangerousPlace = 3, Bridge = 4,
+                     Crossing = 5, Platform = 6, Tunnel = 7,  Switch = 8,
+                     Tks = 9, GpuSaut = 10, DeadEnd = 11 };
+
+    ObjectType getType () const { return type; }
     int getAlsnFreq () const { return alsnFreq; }
     bool isAlsEn () const { return alsEn; }
     int getLength () const { return length; }
@@ -38,6 +44,7 @@ private:
     Rail *parentRail;
     int ordinate;
 
+    ObjectType type;
     int alsnFreq;
     bool alsEn;
     int length;
@@ -47,10 +54,6 @@ private:
     bool pullforthForFreightTrain;
     bool pullforthForPassengerTrain;
     QString name;
-
-    enum OjectType { TrafficLight = 1, Station = 2, DangerousPlace = 3, Bridge = 4,
-                     Crossing = 5, Platform = 6, Tunnel = 7,  Switch = 8,
-                     Tks = 9, GpuSaut = 10, DeadEnd = 11 };
 
     struct RawObjectData
     {
@@ -67,9 +70,8 @@ private:
         unsigned int speedRestriction           :8;     // 5
         unsigned int alsnFreq                   :8;     // 6
         unsigned int ordinate                   :8*3;   // 7
-        unsigned int name                       :8*8;
-        unsigned int                            :8*2;
-    };
+        char         name                       [8];
+    } __attribute__((packed));
     static constexpr size_t rawObjectDataSize = 20;
 };
 

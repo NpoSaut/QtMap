@@ -4,6 +4,7 @@
 #define EARTH_RADIUS 6371000
 
 #include "kilometerpost.h"
+#include "rail.h"
 
 using namespace Navigation;
 
@@ -44,25 +45,33 @@ struct GreenPost
     unsigned int latitudeCode        :8*4;
     unsigned int longitudeCode       :8*4;
     unsigned int trackAddress        :8*3;
-};
+} __attribute__((packed));
 const int GreenPostSize = 15;
 
-KilometerPost KilometerPost::loadFrom(const QByteArray& data, int offset, int index)
+KilometerPost *KilometerPost::loadFrom(const QByteArray& data, int offset, int index)
 {
-    GreenPost gpost;
-    for (int i = 0; i < GreenPostSize; i ++)
-    {
-        *((char *) &gpost + i) = *(data.data () + offset + GreenPostSize * index + i);
-    }
+    GreenPost &gpost = *((GreenPost *)(data.data () + offset + GreenPostSize * index));
 
-    KilometerPost kp;
-    kp.id = index;
-    kp.ordinate = gpost.ordinate;
-    kp.lat = gpost.latitudeCode  * 10e-9 * 180 / MATH_PI;
-    kp.lon = gpost.longitudeCode * 10e-9 * 180 / MATH_PI;
-    *((int *) &kp.position) = gpost.position;
-    kp.direction = gpost.ordinateDirection == 0 ? kid_increase : kid_decrease;
-    kp.position = kp.position;
+    KilometerPost *kp = new KilometerPost();
+    kp->id = index;
+    kp->ordinate = gpost.ordinate;
+    kp->lat = gpost.latitudeCode  * 10e-9 * 180 / MATH_PI;
+    kp->lon = gpost.longitudeCode * 10e-9 * 180 / MATH_PI;
+    *((int *) &kp->position) = gpost.position;
+    kp->direction = gpost.ordinateDirection == 0 ? kid_increase : kid_decrease;
+    kp->position = (KilometerPostPosition) gpost.position;
+
+
+    int railCount = *(data.data () + gpost.trackAddress);
+    for (int i = 0; i < railCount; i ++)
+    {
+        Rail *rail = Rail::loadFrom (data, gpost.trackAddress+1, i);
+        if (rail->isExist ())
+        {
+            rail->setKilometerPost (kp);
+            kp->rails[rail->getNumber ()] = rail;
+        }
+    }
 
     return kp;
 }
