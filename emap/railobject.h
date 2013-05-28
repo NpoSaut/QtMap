@@ -67,10 +67,11 @@ private:
         unsigned int speedRestriction           :8;     // 5
         unsigned int alsnFreq                   :8;     // 6
         unsigned int ordinate                   :8*3;   // 7
-        unsigned int name                       :8*8;
+        unsigned int name                       :8*4;
+        unsigned int name2                      :8*4;
         unsigned int                            :8*2;
     };
-    static constexpr size_t rawObjectDataSize = 20;
+    static const size_t rawObjectDataSize = 20;
 };
 
 }
