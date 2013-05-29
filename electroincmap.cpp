@@ -41,6 +41,29 @@ using namespace std;
 
 HANDLE ch;
 
+#else
+
+#define SET_COLOR(fg, bg) printf("\033[%d;%d;%dm", (fg >> 4) & 0x01, 30 + (fg & 0xf), 40 + (bg & 0xf))
+#define RESET_COLOR SET_COLOR(CL_WHITE,CL_BLACK)
+
+#define CL_BLACK    0x00
+#define CL_BLUE     0x04
+#define CL_GREEN    0x02
+#define CL_CYAN     0x06
+#define CL_RED      0x01
+#define CL_VIOLET   0x05
+#define CL_YELLOW   0x03
+#define CL_WHITE    0x07
+
+#define CL_GRAY     0x10
+#define CL_BLUE_L   0x14
+#define CL_GREEN_L  0x12
+#define CL_CYAN_L   0x16
+#define CL_RED_L    0x11
+#define CL_VIOLET_L 0x15
+#define CL_YELLOW_L 0x13
+#define CL_WHITE_L  0x17
+
 #endif
 
 ElectroincMap::ElectroincMap(QObject *parent) :
@@ -120,13 +143,13 @@ void ElectroincMap::checkMap(double lat, double lon)
     if (firstEntery)
     {
         // Находим ближайший километровый столб (за исключением "столба отправления")
-        KilometerPost closestPost;
+        KilometerPost *closestPost = nullptr;
         double closestDist = 1e20;
-        foreach (KilometerPost p, nearPosts)
+        foreach (KilometerPost *p, nearPosts)
         {
             if (p != departPost)
             {
-                double d = p.distanceTo(lat, lon);
+                double d = p->distanceTo(lat, lon);
                 if (d < closestDist)
                 {
                     closestPost = p;
@@ -139,39 +162,32 @@ void ElectroincMap::checkMap(double lat, double lon)
     }
 
     // Находим ближайшие столбы
-    list<KilometerPost> nextPosts = getPostsInArea(lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
+    list<KilometerPost *> nextPosts = getPostsInArea(lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
 
     nextPosts.remove(departPost);       // Удаляем оттуда столб отправления
     syncPostApproaches(nextPosts);      // И синхронизируем список приближений
 
     // Вычисляем приближения для всех точек
-    D_foreach(postApproaches, PostApproach, pait)
+    foreach(PostApproach *pa, postApproaches)
     {
-        PostApproach &pa = *pait;
         // Добавляем текущую точку приближения
-        ApproachingPoint ap;
-        ap.x = x;   ap.r = pa.post.distanceTo(lat, lon);
-        pa.pushApproaching(ap);
+        ApproachingPoint ap(x, pa->post->distanceTo(lat, lon));
+        pa->pushApproaching(ap);
     }
 
     // Постараемся найти приближение для целевого поста
     PostApproach *targetPostApproach = nullptr;
-    D_foreach(postApproaches, PostApproach, pait)
-    {
-        PostApproach &pa = *pait;
-        if (pa.post == targetPost)
-        {
-            targetPostApproach = &pa;
-        }
-    }
+    foreach (PostApproach *pa, postApproaches)
+        if (pa->post == targetPost)
+            targetPostApproach = pa;
 
     printf(" target: ");
-    SET_COLOR(0xe,0);
+    SET_COLOR(CL_YELLOW_L, CL_BLACK);
     if (targetPostApproach == nullptr) printf("null");
-    else printf("%5.0f", targetPost.ordinate);
+    else printf("%5.0f", targetPost->ordinate);
     RESET_COLOR;
     printf(" appr: ");
-    SET_COLOR(2,0);
+    SET_COLOR(CL_GREEN_L, CL_BLACK);
     printf("%5.2f", targetPostApproach->approachingSpeed);
     RESET_COLOR;
     printf("\n");
@@ -186,24 +202,26 @@ void ElectroincMap::checkMap(double lat, double lon)
     // Проверяем, не достигнут ли целевой столб
     if (targetPostApproach->achived)
     {
-        SET_COLOR(0xF,0);
+        SET_COLOR(CL_WHITE_L,CL_BLACK);
 
-        PostApproach &pa = *targetPostApproach;
-        // Трубим
-        emit onPostDetected(pa.post, pa.getX());
 
-        qDebug() << "FIXED TO POST: " << pa.post.ordinate << "m   x: " << pa.getX();
+        qDebug() << "FIXED TO POST: " << targetPostApproach->post->ordinate << "m   x: " << targetPostApproach->getX();
 
         departPost = targetPost;
 
         KilometerPost *p = projectNextPost(departPost);
 
+
+        // Трубим
+        emit onPostDetected(*targetPost, targetPostApproach->getX());
+
+
         if (p == nullptr) targetPost = findBestApproach()->post;
-        else targetPost = *p;
+        else targetPost = p;
 
-        qDebug() << "NEXT: " << targetPost.ordinate << endl << endl << endl;
+        qDebug() << "NEXT: " << targetPost->ordinate << endl << endl << endl;
 
-        SET_COLOR(7,0);
+        RESET_COLOR;
     }
 }
 
@@ -212,33 +230,32 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
     double targetWeigth = 1e20;
     PostApproach *targetPostApproach;
 
-    D_foreach(postApproaches, PostApproach, pait)
+    foreach(PostApproach *pa, postApproaches)
     {
-        PostApproach &pa = *pait;
-        if (pa.approachingSpeed > 0.0)
+        if (pa->approachingSpeed > 0.0)
         {
             double weigth = getPostApproachWeight(pa);
 
-            byte tColor = 7;
-            byte bColor = 0;
+            int tColor = CL_WHITE;
+            int bColor = CL_BLACK;
 
             printf("  ");
 
-            if (pa.post.sectionId == 6)        { tColor = 0x2; }
-            if (pa.post.sectionId == 4)        { tColor = 0x4; }
-            if (pa.post.sectionId == 1)        { tColor = 0x1; }
+            if (pa->post->sectionId == 6)        { tColor = CL_RED_L; }
+            if (pa->post->sectionId == 4)        { tColor = CL_YELLOW_L; }
+            if (pa->post->sectionId == 1)        { tColor = CL_BLUE_L; }
 
-            SET_COLOR(CL_LIGHT(tColor), bColor);
+            SET_COLOR(tColor, bColor);
 
             qDebug(" post %5.0f:   %5.0f x %5.2f  >  %6.2f",
-                   pa.post.ordinate,
-                   pa.minimalApproach, pa.approachingSpeed,
+                   pa->post->ordinate,
+                   pa->minimalApproach, pa->approachingSpeed,
                    weigth);
 
             if (weigth < targetWeigth)
             {
-                targetPostApproach = &pa;
-                targetPost = pa.post;
+                targetPostApproach = pa;
+                targetPost = pa->post;
                 targetWeigth = weigth;
             }
             RESET_COLOR;
@@ -246,14 +263,14 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
     }
 
     SET_COLOR(0xe, 0);
-    printf("      CHECKED to %5.0f\n", targetPostApproach->post.ordinate);
+    printf("      CHECKED to %5.0f\n", targetPostApproach->post->ordinate);
     RESET_COLOR;
 
     return targetPostApproach;
 }
 
 // Рассчитывает вес для точки приближения
-double ElectroincMap::getPostApproachWeight(ElectroincMap::PostApproach &pa)
+double ElectroincMap::getPostApproachWeight(const ElectroincMap::PostApproach *pa)
 {
 //    double priblizhenie = pa.approachingSpeed;
 
@@ -263,7 +280,7 @@ double ElectroincMap::getPostApproachWeight(ElectroincMap::PostApproach &pa)
 
 //    return zaDisstance + (1 + zaSectsiyu) * priblizhenie;
 
-    return pa.minimalApproach / pa.approachingSpeed;
+    return pa->minimalApproach / pa->approachingSpeed;
 }
 
 // Возвращает все километровые солбы в указанном радиусе
@@ -288,37 +305,43 @@ list<KilometerPost *> ElectroincMap::getPostsInArea(vector<KilometerPost *> &sou
 
 void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
 {
-    list<PostApproach> newApproaches;
+    list<PostApproach *> newApproaches;
     foreach (KilometerPost *p, posts) {
-        PostApproach pa;
-        pa.post = p;
-        foreach (PostApproach ipa, postApproaches) {
-            if (ipa.post == p)
+        PostApproach *pa = nullptr;
+        foreach (PostApproach *ipa, postApproaches) {
+            if (ipa->post == p)
             {
                 pa = ipa;
+                postApproaches.remove (ipa);
                 break;
             }
         }
+        if (pa == nullptr)
+        {
+            pa = new PostApproach(p);
+        }
         newApproaches.push_back(pa);
+    }
+    foreach (PostApproach *deadPa, postApproaches) {
+        delete deadPa;
     }
     postApproaches = newApproaches;
 }
 
-KilometerPost *ElectroincMap::projectNextPost(KilometerPost forPost)
+KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost)
 {
-    int direction = forPost.direction * (trackNumber % 2 == 0 ? 1 : -1);
+    int direction = forPost->direction * (trackNumber % 2 == 0 ? 1 : -1);
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
-    D_foreach(nearPosts, KilometerPost *, kpi)
+    foreach(KilometerPost *kp, nearPosts)
     {
-        KilometerPost &kp = **kpi;
-        if (kp.sectionId == forPost.sectionId)
+        if (kp->sectionId == forPost->sectionId)
         {
-            double ordinateShift = direction * (kp.ordinate - forPost.ordinate);
+            double ordinateShift = direction * (kp->ordinate - forPost->ordinate);
             if (ordinateShift > 0 && ordinateShift < shiftToRes)
             {
                 shiftToRes = ordinateShift;
-                res = &kp;
+                res = kp;
             }
         }
     }
@@ -326,21 +349,14 @@ KilometerPost *ElectroincMap::projectNextPost(KilometerPost forPost)
     return res;
 }
 
-
-ElectroincMap::PostApproach::PostApproach()
-{
-    achived = false;
-    minimalApproach = 1e20;
-}
-
 vector<ElectroincMap::ApproachingPoint> ElectroincMap::PostApproach::getExtremumApproaches()
 {
-    vector<ApproachingPoint> res;
+    vector<ElectroincMap::ApproachingPoint> res;
 
-    ApproachingPoint prev_ap;
-    D_foreach(aPoints, ApproachingPoint, itr)
+    ElectroincMap::ApproachingPoint prev_ap(1e20, 1e20);
+    D_foreach(aPoints, ElectroincMap::ApproachingPoint, itr)
     {
-        ApproachingPoint ap = ApproachingPoint(*itr);
+        ElectroincMap::ApproachingPoint ap = *itr;
         if (ap.r == minimalApproach)
         {
             res.push_back(prev_ap);
@@ -395,7 +411,7 @@ double ElectroincMap::PostApproach::getX()
 double ElectroincMap::PostApproach::estimateApproaching()
 {
     double sumSlope = 0;
-    ApproachingPoint prewPoint;
+    ApproachingPoint prewPoint(1e20, 1e20);
     bool isFirstPoint = true;
     foreach (ApproachingPoint ap, aPoints) {
         if (!isFirstPoint)

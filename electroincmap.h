@@ -37,6 +37,10 @@ private:
     class ApproachingPoint
     {
     public:
+        ApproachingPoint(double x, double r)
+            : x(x), r(r)
+        { }
+
         double x;
         double r;
     };
@@ -44,10 +48,13 @@ private:
     class PostApproach
     {
     public:
-        PostApproach();
+        PostApproach(KilometerPost *post)
+            : post(post),
+              achived(false),
+              minimalApproach(1e20)
+        { }
+
         KilometerPost *post;
-        vector<ApproachingPoint> getExtremumApproaches();
-        double parabolizeX(vector<ApproachingPoint> aprs);
         bool pushApproaching(ApproachingPoint p);
         bool achived;
         double getX();
@@ -55,12 +62,14 @@ private:
         double approachingSpeed;
         list<ApproachingPoint> aPoints;
     private:
+        double parabolizeX(vector<ApproachingPoint> aprs);
+        vector<ApproachingPoint> getExtremumApproaches();
         double estimateApproaching();
     };
-    list<ElectroincMap::PostApproach> postApproaches;
+    list<ElectroincMap::PostApproach *> postApproaches;
     void syncPostApproaches(list<KilometerPost *> posts);
-    KilometerPost *projectNextPost(KilometerPost forPost);
-    double getPostApproachWeight(PostApproach &pa);
+    KilometerPost *projectNextPost(const KilometerPost *forPost);
+    double getPostApproachWeight(const PostApproach *pa);
 
     PostApproach *findBestApproach();
 

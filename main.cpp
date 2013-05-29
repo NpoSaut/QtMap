@@ -776,9 +776,11 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #endif
 
 
+    printf("\033[0;36;40m HELLO!!!\033[0;37;40m");
+
     elMap.load ("./map.gps");
     elMap.setTrackNumber(2);
-    for (int i = 0; i < 600; i++)
+    for (int i = 0; i < 400; i++)
     {
         elMap.setMetrometer (coords[i][2]);
         elMap.checkMap (coords[i][0], coords[i][1]);
