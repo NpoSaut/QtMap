@@ -13,7 +13,7 @@ class RouteSection
 {
 public:
     RouteSection(int id);
-    std::vector<KilometerPost> Posts;
+    std::vector<KilometerPost *> posts;
 
     inline bool operator == (const RouteSection &s)    { return id == s.id; }
     inline bool operator != (const RouteSection &s)    { return !(*this == s); }

@@ -1,10 +1,9 @@
 #include <vector>
-
-#include <QFile>
 #include <math.h>
 
-#include "electroincmap.h"
+#include <QFile>
 
+#include "electroincmap.h"
 
 using namespace Navigation;
 #include <QDebug>
@@ -80,20 +79,20 @@ void ElectroincMap::load(QString fileName)
     int postsCount = data[2] | data[3] << 8;
 
     int sectionId = 1;
-    RouteSection section(sectionId);
+    RouteSection *section = new RouteSection(sectionId);
     // Считываем столбы
     for (int i = 0; i < postsCount; i++)
     {
-        KilometerPost currentPost = KilometerPost::loadFrom(data, 9, i);
-        currentPost.sectionId = sectionId;
+        KilometerPost *currentPost = KilometerPost::loadFrom(data, 9, i);
         allPosts.push_back(currentPost);
-        section.Posts.push_back(currentPost);
+        section->posts.push_back(currentPost);
 
-        if (currentPost.position == kpp_end)
+        currentPost->sectionId = sectionId;
+
+        if (currentPost->position == kpp_end)
         {
             sections.push_back(section);
-            RouteSection empty(sectionId);
-            section = empty;
+            section = new RouteSection(sectionId);
             sectionId++;
         }
     }
@@ -268,18 +267,18 @@ double ElectroincMap::getPostApproachWeight(ElectroincMap::PostApproach &pa)
 }
 
 // Возвращает все километровые солбы в указанном радиусе
-list<KilometerPost> ElectroincMap::getPostsInArea(double lat, double lon, double radius)
+list<KilometerPost *> ElectroincMap::getPostsInArea(double lat, double lon, double radius)
 {
     return getPostsInArea(allPosts, lat, lon, radius);
 }
-list<KilometerPost> ElectroincMap::getPostsInArea(vector<KilometerPost> source, double lat, double lon, double radius)
+list<KilometerPost *> ElectroincMap::getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius)
 {
-    list<KilometerPost> res;
+    list<KilometerPost *> res;
 
     double radiusEstimation = KilometerPost::metersToEstimation(radius);
-    foreach (KilometerPost p, source) {
+    foreach (KilometerPost *p, source) {
         //if (p.estimateDistanceTo(lat, lon) <= radiusEstimation)
-        if (p.distanceTo (lat, lon) <= radius)
+        if (p->distanceTo (lat, lon) <= radius)
         {
             res.push_back(p);
         }
@@ -287,10 +286,10 @@ list<KilometerPost> ElectroincMap::getPostsInArea(vector<KilometerPost> source, 
     return res;
 }
 
-void ElectroincMap::syncPostApproaches(list<KilometerPost> posts)
+void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
 {
     list<PostApproach> newApproaches;
-    foreach (KilometerPost p, posts) {
+    foreach (KilometerPost *p, posts) {
         PostApproach pa;
         pa.post = p;
         foreach (PostApproach ipa, postApproaches) {
@@ -310,9 +309,9 @@ KilometerPost *ElectroincMap::projectNextPost(KilometerPost forPost)
     int direction = forPost.direction * (trackNumber % 2 == 0 ? 1 : -1);
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
-    D_foreach(nearPosts, KilometerPost, kpi)
+    D_foreach(nearPosts, KilometerPost *, kpi)
     {
-        KilometerPost &kp = *kpi;
+        KilometerPost &kp = **kpi;
         if (kp.sectionId == forPost.sectionId)
         {
             double ordinateShift = direction * (kp.ordinate - forPost.ordinate);

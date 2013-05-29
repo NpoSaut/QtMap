@@ -16,27 +16,31 @@ class Rail
 {
 public:
     Rail ()
+        : kilometerPost (nullptr), objects(), number(0), existence (false)
     {}
 
-    static Rail loadFrom (QByteArray rawData, int offset, int index);
+    static Rail *loadFrom (QByteArray rawData, int offset, int index);
 
     void setKilometerPost (KilometerPost *kilometerPost) { Rail::kilometerPost = kilometerPost; }
     KilometerPost *getKilometerPost () const { return kilometerPost; }
 
-    const vector<RailObject> &getObjects () const { return objects; }
-    int getNumber () const { return number; }
+    const vector<RailObject *> &getObjects () const { return objects; }
+    unsigned int getNumber () const { return number; }
+    bool isExist () const { return existence; }
 
 private:
     KilometerPost *kilometerPost;
-    vector<RailObject> objects;
-    int number;
+    vector<RailObject *> objects;
+    unsigned int number;
+    bool existence;
 
-    struct RawRoadData
+    struct RawRailData
     {
-        unsigned int number                 :8;
-        unsigned int childObjectsAmount     :8;
-        unsigned int childObjectsAddress    :8;
-    };
+        unsigned int number                 :8      ;
+        unsigned int childObjectsCount      :8      ;
+        unsigned int childObjectsAddress    :3*8    ;
+    } __attribute__((packed));
+    static const int RawRailDataSize = 5;
 };
 
 }
