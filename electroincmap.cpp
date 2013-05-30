@@ -158,6 +158,9 @@ void ElectroincMap::checkMap(double lat, double lon)
             }
         }
         targetPost = closestPost;
+        departPost = projectNextPost(targetPost, true);
+        departX = x - departPost->distanceTo(lat, lon);
+
         firstEntery = false;
     }
 
@@ -165,7 +168,7 @@ void ElectroincMap::checkMap(double lat, double lon)
     list<KilometerPost *> nextPosts = getPostsInArea(lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
 
     nextPosts.remove(departPost);       // Удаляем оттуда столб отправления
-    syncPostApproaches(nextPosts);      // И синхронизируем список приближений
+    syncPostApproaches(nextPosts);      // синхронизируем список приближений
 
     // Вычисляем приближения для всех точек
     foreach(PostApproach *pa, postApproaches)
@@ -202,19 +205,17 @@ void ElectroincMap::checkMap(double lat, double lon)
     // Проверяем, не достигнут ли целевой столб
     if (targetPostApproach->achived)
     {
-        SET_COLOR(CL_WHITE_L,CL_BLACK);
+        SET_COLOR(CL_WHITE_L, CL_BLACK);
 
+        // Трубим
 
         qDebug() << "FIXED TO POST: " << targetPostApproach->post->ordinate << "m   x: " << targetPostApproach->getX();
 
-        departPost = targetPost;
+        departPost = targetPostApproach->post;
+        departX    = targetPostApproach->getX();
+        emit onPostDetected(*departPost, departX);
 
         KilometerPost *p = projectNextPost(departPost);
-
-
-        // Трубим
-        emit onPostDetected(*targetPost, targetPostApproach->getX());
-
 
         if (p == nullptr) targetPost = findBestApproach()->post;
         else targetPost = p;
@@ -269,17 +270,46 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
     return targetPostApproach;
 }
 
+
+// Получает список ближайих целей
+vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost, double startPostX, int count)
+{
+    vector<EMapTarget> res;
+    double currentPostX = startPostX;
+    KilometerPost *currentPost = startPost;
+
+    // Повторяем всё, пока не наполнится список объектов
+    do
+    {
+        Rail *currentRail = getMyRail(currentPost);
+        // Делаем дела для каждого объекта на текущем пути текущего километрового столба
+        foreach (RailObject *o, currentRail->objects)
+        {
+            // Вычисляем координату X объекта
+            double objectX = currentPostX + (o->ordinate - currentPost->ordinate);
+            if (objectX >= x)       // Добавляем объект в список только если его координата X больше текущей
+            {
+                EMapTarget target(o, (int)objectX);
+                res.push_back(target);
+            }
+            if (res.size() >= count) break;     // Прерываем цикл, если набрали достаточное количество целей
+        }
+        KilometerPost *nextPost = projectNextPost(currentPost);
+        currentPostX += nextPost->ordinate - currentPost->ordinate;
+        currentPost = nextPost;
+    } while (res.size() < count);
+    return res;
+}
+
+Rail *ElectroincMap::getMyRail(KilometerPost *post)
+{
+    if (post->rails.find(trackNumber) != map::end()) return post->rails[trackNumber];
+    else return nullptr;
+}
+
 // Рассчитывает вес для точки приближения
 double ElectroincMap::getPostApproachWeight(const ElectroincMap::PostApproach *pa)
 {
-//    double priblizhenie = pa.approachingSpeed;
-
-//    double zaSectsiyu = pa.post == targetPost ? 1 : 0;
-//    double zaDisstance = 1 - pa.minimalApproach / 1000.0;
-
-
-//    return zaDisstance + (1 + zaSectsiyu) * priblizhenie;
-
     return pa->minimalApproach / pa->approachingSpeed;
 }
 
@@ -328,9 +358,9 @@ void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
     postApproaches = newApproaches;
 }
 
-KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost)
+KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost, bool goBack)
 {
-    int direction = forPost->direction * (trackNumber % 2 == 0 ? 1 : -1);
+    int direction = forPost->direction * (trackNumber % 2 == 0 ? 1 : -1) * (goBack ? -1 : 1);
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
     foreach(KilometerPost *kp, nearPosts)

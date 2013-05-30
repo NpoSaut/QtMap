@@ -30,6 +30,7 @@ public:
     KilometerIncreaseDirectoin direction;
     std::map<int, Rail *> rails;
 
+    double distanceTo(KilometerPost p2);
     double distanceTo(double to_lat, double to_lon);
     double estimateDistanceTo(KilometerPost p2);
     double estimateDistanceTo(double to_lat, double to_lon);

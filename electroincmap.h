@@ -27,6 +27,7 @@ private:
     list<KilometerPost *> nearPosts;
     KilometerPost *targetPost;
     KilometerPost *departPost;
+    double departX;
 
     list<KilometerPost *> getPostsInArea(double lat, double lon, double radius);
     list<KilometerPost *> getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius);
@@ -66,12 +67,23 @@ private:
         vector<ApproachingPoint> getExtremumApproaches();
         double estimateApproaching();
     };
+
+
     list<ElectroincMap::PostApproach *> postApproaches;
     void syncPostApproaches(list<KilometerPost *> posts);
-    KilometerPost *projectNextPost(const KilometerPost *forPost);
+    KilometerPost *projectNextPost(const KilometerPost *forPost, bool goBack = false);
     double getPostApproachWeight(const PostApproach *pa);
 
     PostApproach *findBestApproach();
+
+    vector<EMapTarget> getNextObjects(KilometerPost startPost, double startX, int count = 10);
+
+    /**
+     * @brief getMyRail Находит путь, на котором ты окажешься
+     * @param post      Столб, для которого ты хочешь найти путь
+     * @return          Ссылку на путь, по которому поедешь, если он есть. Иначе null
+     */
+    Rail *getMyRail(KilometerPost *post);
 
 public:
     explicit ElectroincMap(QObject *parent = 0);
@@ -79,6 +91,7 @@ public:
 
 signals:
     void onPostDetected(KilometerPost post, double x);
+    void onUpcomingTargets(vector<EMapTarget>);
 
 public slots:
     void setMetrometer(double value);

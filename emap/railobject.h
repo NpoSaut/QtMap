@@ -5,6 +5,7 @@
 #include <QString>
 
 #include "almanac.h"
+#include "packing.h"
 
 namespace Navigation
 {
@@ -55,6 +56,7 @@ private:
     bool pullforthForPassengerTrain;
     QString name;
 
+    PACKED (
     struct RawObjectData
     {
         unsigned int type                       :8;     // 1
@@ -71,8 +73,8 @@ private:
         unsigned int alsnFreq                   :8;     // 6
         unsigned int ordinate                   :8*3;   // 7
         char         name                       [8];
-    } __attribute__((packed));
-    static constexpr size_t rawObjectDataSize = 20;
+    });
+    static const int rawObjectDataSize = 20;
 };
 
 }

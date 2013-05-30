@@ -34,12 +34,13 @@ private:
     unsigned int number;
     bool existence;
 
+    PACKED(
     struct RawRailData
     {
         unsigned int number                 :8      ;
         unsigned int childObjectsCount      :8      ;
         unsigned int childObjectsAddress    :3*8    ;
-    } __attribute__((packed));
+    });
     static const int RawRailDataSize = 5;
 };
 

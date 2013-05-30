@@ -1,6 +1,7 @@
 #ifndef ALMANAC_H
 #define ALMANAC_H
 
+class Target;
 namespace Navigation
 {
 
