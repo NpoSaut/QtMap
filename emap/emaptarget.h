@@ -6,7 +6,7 @@
 class EMapTarget
 {
 public:
-    EMapTarget(Navigation::RailObject *object, x)
+    EMapTarget(Navigation::RailObject *object, int x)
         :object(object), x(x)
     { }
 

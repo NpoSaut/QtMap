@@ -28,6 +28,8 @@ public:
     unsigned int getNumber () const { return number; }
     bool isExist () const { return existence; }
 
+    KilometerIncreaseDirectoin direction;
+
 private:
     KilometerPost *kilometerPost;
     vector<RailObject *> objects;

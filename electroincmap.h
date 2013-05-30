@@ -10,6 +10,7 @@
 #include "emap/almanac.h"
 #include "emap/routesection.h"
 #include "emap/kilometerpost.h"
+#include "emap/emaptarget.h"
 
 namespace Navigation
 {
@@ -76,14 +77,14 @@ private:
 
     PostApproach *findBestApproach();
 
-    vector<EMapTarget> getNextObjects(KilometerPost startPost, double startX, int count = 10);
+    vector<EMapTarget> getNextObjects(const KilometerPost *startPost, double startPostX, int count = 10);
 
     /**
      * @brief getMyRail Находит путь, на котором ты окажешься
      * @param post      Столб, для которого ты хочешь найти путь
      * @return          Ссылку на путь, по которому поедешь, если он есть. Иначе null
      */
-    Rail *getMyRail(KilometerPost *post);
+    Rail *getMyRail(const KilometerPost *post);
 
 public:
     explicit ElectroincMap(QObject *parent = 0);

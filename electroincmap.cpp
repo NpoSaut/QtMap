@@ -276,17 +276,17 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
 {
     vector<EMapTarget> res;
     double currentPostX = startPostX;
-    KilometerPost *currentPost = startPost;
+    const KilometerPost *currentPost = startPost;
 
     // Повторяем всё, пока не наполнится список объектов
     do
     {
         Rail *currentRail = getMyRail(currentPost);
         // Делаем дела для каждого объекта на текущем пути текущего километрового столба
-        foreach (RailObject *o, currentRail->objects)
+        foreach (RailObject *o, currentRail->getObjects())
         {
             // Вычисляем координату X объекта
-            double objectX = currentPostX + (o->ordinate - currentPost->ordinate);
+            double objectX = currentPostX + (o->getOrdinate() - currentPost->ordinate);
             if (objectX >= x)       // Добавляем объект в список только если его координата X больше текущей
             {
                 EMapTarget target(o, (int)objectX);
@@ -301,9 +301,9 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
     return res;
 }
 
-Rail *ElectroincMap::getMyRail(KilometerPost *post)
+Rail *ElectroincMap::getMyRail(const KilometerPost *post)
 {
-    if (post->rails.find(trackNumber) != map::end()) return post->rails[trackNumber];
+    if (post->rails.find(trackNumber) != post->rails.end()) return post->rails.at(trackNumber);
     else return nullptr;
 }
 
