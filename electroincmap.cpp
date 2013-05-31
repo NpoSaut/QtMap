@@ -298,38 +298,38 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
     double currentPostX = startPostX;
     const KilometerPost *currentPost = startPost;
 
-    CPRINTF(CL_VIOLET, "  POST X: %5.0f\n", currentPostX);
+//    CPRINTF(CL_VIOLET, "  POST X: %5.0f\n", currentPostX);
 
     // Повторяем всё, пока не наполнится список объектов
     do
     {
-        CPRINTF(CL_GREEN_L, "    Проверяем КП %5.0f", currentPost->ordinate);
-        printf(" X:");
-        CPRINTF(CL_VIOLET_L, " %5.0f\n", currentPostX);
         Rail *currentRail = getMyRail(currentPost);
-        CPRINTF(CL_GREEN, "      Проверяем ОБЪЕКТЫ:");
+//        CPRINTF(CL_GREEN_L, "    Проверяем КП %5.0f", currentPost->ordinate);
+//        printf(" X:");
+//        CPRINTF(CL_VIOLET_L, " %5.0f\n", currentPostX);
+//        CPRINTF(CL_GREEN, "      Проверяем ОБЪЕКТЫ:");
         // Делаем дела для каждого объекта на текущем пути текущего километрового столба
         foreach (RailObject *o, currentRail->getObjects())
         {
             // Вычисляем координату X объекта
             int objectX = (int)(currentPostX + currentRail->direction * currentPost->direction * (o->getOrdinate() - currentPost->ordinate));
-            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
+//            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
             if (objectX >= x)       // Добавляем объект в список только если его координата X больше текущей
             {
-                CPRINTF(CL_GREEN, "*");
+//                CPRINTF(CL_GREEN, "*");
                 EMapTarget target(o, objectX);
                 res.push_back(target);
-            } else printf(" ");
+            } // else printf(" ");
             if (res.size() >= count) break;     // Прерываем цикл, если набрали достаточное количество целей
         }
-        printf("\n");
+//        printf("\n");
         KilometerPost *nextPost = projectNextPost(currentPost);
         if (nextPost == nullptr) break;
         currentPostX += abs(nextPost->ordinate - currentPost->ordinate);
         currentPost = nextPost;
     } while (res.size() < count);
 
-    CPRINTF(CL_GREEN_L, "    Нашли %2d целей\n", res.size());
+//    CPRINTF(CL_GREEN_L, "    Нашли %2d целей\n", res.size());
     return res;
 }
 
@@ -345,9 +345,9 @@ void ElectroincMap::checkObjects()
     if (Rail::getDirectoin(trackNumber) == departPost->direction) currentKilometer = departPost;
     else currentKilometer = targetPost;
 
-    CPRINTF(CL_CYAN, "   [%5.0f --> %5.0f] by KP ", departPost->ordinate, targetPost->ordinate);
-    CPRINTF(CL_CYAN_L, "%5.0f", currentKilometer->ordinate);
-    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate)
+//    CPRINTF(CL_CYAN, "   [%5.0f --> %5.0f] by KP ", departPost->ordinate, targetPost->ordinate);
+//    CPRINTF(CL_CYAN_L, "%5.0f", currentKilometer->ordinate);
+//    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate)
     vector<EMapTarget> targets = getNextObjects(currentKilometer, departX + (departPost->ordinate - currentKilometer->ordinate));
     foreach (EMapTarget t, targets) {
         printf("     TARGET ");
