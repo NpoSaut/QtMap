@@ -86,6 +86,9 @@ private:
      */
     Rail *getMyRail(const KilometerPost *post);
 
+    int closestObjectX;
+    void checkObjects();
+
 public:
     explicit ElectroincMap(QObject *parent = 0);
     void load(QString fileName);

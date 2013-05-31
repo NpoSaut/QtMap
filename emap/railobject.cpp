@@ -9,7 +9,6 @@ QTextDecoder *cp1251Decoder = QTextCodec::codecForName("CP1251")->makeDecoder ()
 RailObject *RailObject::loadFrom(QByteArray rawData, int offset, int index)
 {
     RawObjectData &data = *((RawObjectData *) (rawData.data () + offset + index * rawObjectDataSize));
-
     RailObject *obj = new RailObject();
 
     obj->ordinate = data.ordinate;

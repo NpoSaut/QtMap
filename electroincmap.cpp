@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include <QFile>
+#include <QTextCodec>
 
 #include "electroincmap.h"
 
@@ -10,7 +11,6 @@ using namespace Navigation;
 
 #define D_foreach(l, T, itr) for (list<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 #define D_foreach_vec(l, T, itr) for (vector<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
-
 
 using namespace std;
 
@@ -66,6 +66,8 @@ HANDLE ch;
 
 #endif
 
+#define CPRINTF(__color__, __format__, ...) SET_COLOR(__color__, CL_BLACK); printf(__format__, __VA_ARGS__); RESET_COLOR;
+
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
     firstEnter(true)
@@ -100,6 +102,8 @@ void ElectroincMap::load(QString fileName)
 
     // Количество столбов
     int postsCount = data[2] | data[3] << 8;
+
+    qDebug() << "loading map...";
 
     int sectionId = 1;
     RouteSection *section = new RouteSection(sectionId);
@@ -137,7 +141,8 @@ void ElectroincMap::setTrackNumber(int value)
 
 void ElectroincMap::checkMap(double lat, double lon)
 {
-    printf(" lat %7.4f lon %7.4f x %4.0f", lat, lon, x);
+    printf(" lat %7.4f lon %7.4f  x: ", lat, lon);
+    CPRINTF(CL_CYAN_L, "%4.0f", x);
 
     nearPosts = getPostsInArea(lat, lon, 10000);
 
@@ -198,15 +203,18 @@ void ElectroincMap::checkMap(double lat, double lon)
     else printf("%5.0f", targetPost->ordinate);
     RESET_COLOR;
     printf(" appr: ");
-    SET_COLOR(CL_GREEN_L, CL_BLACK);
-    printf("%5.2f", targetPostApproach->approachingSpeed);
-    RESET_COLOR;
+    CPRINTF(CL_GREEN_L, "%5.2f", targetPostApproach->approachingSpeed);
     printf("\n");
 
     // Смотрим, не нужно ли соскачить со столба
     if (targetPostApproach == nullptr || (targetPostApproach->approachingSpeed < 0 && targetPostApproach->minimalApproach > 150))
     {
         targetPostApproach = findBestApproach();
+
+        //targetPost = targetPostApproach->post;
+        KilometerPost *p = projectNextPost(targetPost, true);
+        if (p == nullptr) departPost = findBestApproach()->post;
+        else departPost = p;
     }
 
 
@@ -228,10 +236,14 @@ void ElectroincMap::checkMap(double lat, double lon)
         if (p == nullptr) targetPost = findBestApproach()->post;
         else targetPost = p;
 
-        qDebug() << "NEXT: " << targetPost->ordinate << endl << endl << endl;
+        qDebug() << "NEXT: " << targetPost->ordinate << endl;
 
         RESET_COLOR;
+        CPRINTF(CL_BLUE_L, "------------------------------------------------------------------------------------");
+        qDebug() << endl << endl;
     }
+
+    checkObjects();
 }
 
 ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
@@ -286,26 +298,38 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
     double currentPostX = startPostX;
     const KilometerPost *currentPost = startPost;
 
+    CPRINTF(CL_VIOLET, "  POST X: %5.0f\n", currentPostX);
+
     // Повторяем всё, пока не наполнится список объектов
     do
     {
+        CPRINTF(CL_GREEN_L, "    Проверяем КП %5.0f", currentPost->ordinate);
+        printf(" X:");
+        CPRINTF(CL_VIOLET_L, " %5.0f\n", currentPostX);
         Rail *currentRail = getMyRail(currentPost);
+        CPRINTF(CL_GREEN, "      Проверяем ОБЪЕКТЫ:");
         // Делаем дела для каждого объекта на текущем пути текущего километрового столба
         foreach (RailObject *o, currentRail->getObjects())
         {
             // Вычисляем координату X объекта
-            double objectX = currentPostX + (o->getOrdinate() - currentPost->ordinate);
+            int objectX = (int)(currentPostX + currentRail->direction * currentPost->direction * (o->getOrdinate() - currentPost->ordinate));
+            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
             if (objectX >= x)       // Добавляем объект в список только если его координата X больше текущей
             {
-                EMapTarget target(o, (int)objectX);
+                CPRINTF(CL_GREEN, "*");
+                EMapTarget target(o, objectX);
                 res.push_back(target);
-            }
+            } else printf(" ");
             if (res.size() >= count) break;     // Прерываем цикл, если набрали достаточное количество целей
         }
+        printf("\n");
         KilometerPost *nextPost = projectNextPost(currentPost);
-        currentPostX += nextPost->ordinate - currentPost->ordinate;
+        if (nextPost == nullptr) break;
+        currentPostX += abs(nextPost->ordinate - currentPost->ordinate);
         currentPost = nextPost;
     } while (res.size() < count);
+
+    CPRINTF(CL_GREEN_L, "    Нашли %2d целей\n", res.size());
     return res;
 }
 
@@ -313,6 +337,27 @@ Rail *ElectroincMap::getMyRail(const KilometerPost *post)
 {
     if (post->rails.find(trackNumber) != post->rails.end()) return post->rails.at(trackNumber);
     else return nullptr;
+}
+
+void ElectroincMap::checkObjects()
+{
+    KilometerPost *currentKilometer;
+    if (Rail::getDirectoin(trackNumber) == departPost->direction) currentKilometer = departPost;
+    else currentKilometer = targetPost;
+
+    CPRINTF(CL_CYAN, "   [%5.0f --> %5.0f] by KP ", departPost->ordinate, targetPost->ordinate);
+    CPRINTF(CL_CYAN_L, "%5.0f", currentKilometer->ordinate);
+    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate)
+    vector<EMapTarget> targets = getNextObjects(currentKilometer, departX + (departPost->ordinate - currentKilometer->ordinate));
+    foreach (EMapTarget t, targets) {
+        printf("     TARGET ");
+        CPRINTF(CL_YELLOW, "%2d", t.object->getType());
+        printf(" x: ");
+        CPRINTF(CL_YELLOW_L, "%5d", t.x);
+        printf(" ordinate: ");
+        CPRINTF(CL_CYAN, "%5d", t.object->getOrdinate());
+        printf("\n");
+    }
 }
 
 // Рассчитывает вес для точки приближения
@@ -368,7 +413,7 @@ void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
 
 KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost, bool goBack)
 {
-    int direction = forPost->direction * (trackNumber % 2 == 0 ? 1 : -1) * (goBack ? -1 : 1);
+    int direction = forPost->direction * getMyRail(forPost)->direction * (goBack ? -1 : 1);
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
     foreach(KilometerPost *kp, nearPosts)

@@ -63,18 +63,18 @@ private:
     PACKED (
     struct RawObjectData
     {
-        unsigned int type                       :8;     // 1
-        unsigned int length                     :16;    // 2
-        unsigned int                            :8;     // 3
+        unsigned char type                      :8;     // 1
+        unsigned short length                   :16;    // 2
+        unsigned char                           :8;     // 3
 
-        unsigned int                            :4;     // 4
-        unsigned int pullforthForFreightTrain   :1;
-        unsigned int alsEn                      :1;
-        unsigned int pullforthForPassengerTrain :1;
-        unsigned int radioOrConditionallyAllow  :1;
+        unsigned char                           :4;     // 4
+        bool pullforthForFreightTrain           :1;
+        bool alsEn                              :1;
+        bool pullforthForPassengerTrain         :1;
+        bool radioOrConditionallyAllow          :1;
 
-        unsigned int speedRestriction           :8;     // 5
-        unsigned int alsnFreq                   :8;     // 6
+        unsigned char speedRestriction          :8;     // 5
+        unsigned char alsnFreq                  :8;     // 6
         unsigned int ordinate                   :8*3;   // 7
         char         name                       [8];
     });

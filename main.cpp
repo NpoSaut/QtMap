@@ -785,15 +785,22 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QtConcurrent::run(getParamsFromConsole);
 #endif
 
+    //system("chcp 65001");
 
-    printf("\033[0;36;40m HELLO!!!\033[0;37;40m");
+    printf("\033[0;36;40m HELLO!!!\033[0;37;40m\n");
 
-    elMap->load ("./map.gps");
-    elMap->setTrackNumber(2);
-    for (int i = 0; i < 400; i++)
+    elMap.load ("./map.gps");
+    elMap.setTrackNumber(1);
+
+    int a = 0;
+    int b = 200;
+    int inc = (int)((b - a)/abs(b - a));
+    qDebug("Moving on %d -- %d with step: %2d\n", a, b, inc);
+
+    for (int i = a; i < b; i += inc)
     {
-        elMap->setMetrometer (coords[i][2]);
-        elMap->checkMap (coords[i][0], coords[i][1]);
+        elMap.setMetrometer (coords[a][2] + inc * coords[i][2]);
+        elMap.checkMap (coords[i][0], coords[i][1]);
         //getc(stdin);
     }
 
