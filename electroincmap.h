@@ -21,7 +21,7 @@ class ElectroincMap : public QObject
 
 
 private:
-    bool firstEntery;
+    bool firstEnter;
     vector<KilometerPost *> allPosts;
     list<RouteSection *> sections;
 
@@ -92,7 +92,7 @@ public:
 
 signals:
     void onPostDetected(KilometerPost post, double x);
-    void onUpcomingTargets(vector<EMapTarget>);
+    void onUpcomingTargets(std::vector<EMapTarget>);
 
 public slots:
     void setMetrometer(double value);

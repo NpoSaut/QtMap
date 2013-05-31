@@ -15,7 +15,11 @@ class RailObject
 
 public:
     RailObject ()
-        : parentRail (nullptr), ordinate (0)
+        : parentRail (nullptr), ordinate (0),
+          alsnFreq(0), alsEn(false), length(0), speedRestriction(0),
+          conditionallyAllowForFreightTrain(false), radioChannel(false),
+          pullforthForFreightTrain(false), pullforthForPassengerTrain(false),
+          name ()
     {}
 
     static RailObject *loadFrom (QByteArray rawData, int offset, int index);

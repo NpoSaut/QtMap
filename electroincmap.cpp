@@ -68,7 +68,7 @@ HANDLE ch;
 
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
-    firstEntery(true)
+    firstEnter(true)
 {
 #ifdef WIN32
     ch = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -119,6 +119,7 @@ void ElectroincMap::load(QString fileName)
             sectionId++;
         }
     }
+    qDebug() << sections.front ()->posts[0]->rails.at(1)->getObjects()[0]->getName();
 }
 
 void ElectroincMap::setMetrometer(double value)
@@ -140,7 +141,7 @@ void ElectroincMap::checkMap(double lat, double lon)
 
     nearPosts = getPostsInArea(lat, lon, 10000);
 
-    if (firstEntery)
+    if (firstEnter)
     {
         // Находим ближайший километровый столб (за исключением "столба отправления")
         KilometerPost *closestPost = nullptr;
@@ -161,7 +162,14 @@ void ElectroincMap::checkMap(double lat, double lon)
         departPost = projectNextPost(targetPost, true);
         departX = x - departPost->distanceTo(lat, lon);
 
-        firstEntery = false;
+        vector<EMapTarget> obj;
+        for (int i = 0; i < 10; i ++)
+        {
+            obj.push_back (EMapTarget(allPosts[i]->rails[1]->getObjects()[0], i));
+        }
+        emit onUpcomingTargets (obj);
+
+        firstEnter = false;
     }
 
     // Находим ближайшие столбы

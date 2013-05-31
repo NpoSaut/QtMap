@@ -12,6 +12,8 @@ using namespace Navigation;
 
 // Представление километрового столба
 KilometerPost::KilometerPost()
+    : lat(0), lon(0), ordinate(0), sectionId(0),
+      position(), direction(), rails()
 {
 }
 

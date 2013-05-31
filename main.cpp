@@ -1,24 +1,29 @@
+#include <iostream>
+#include <math.h>
+
 #include <QApplication>
-#include "qmlapplicationviewer.h"
-#include "systemstateviewmodel.h"
-#include "qtconcurrentrun.h"
+#include <QtConcurrentRun>
 #include <QTextStream>
 #include <QTextCodec>
+#include <qmlapplicationviewer.h>
+
+#include "systemstateviewmodel.h"
 #include "electroincmap.h"
-#include "math.h"
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
+#include "iodrv/emapcanemitter.h"
 #endif
 
-#include <iostream>
 
 SystemStateViewModel *systemState ;
+Navigation::ElectroincMap* elMap;
 
 #ifdef WITH_CAN
 iodrv* iodriver;
 SpeedAgregator* speedAgregator;
 rmp_key_handler* rmp_key_hdlr;
+EMapCanEmitter* emapCanEmitter;
 #endif
 
 
@@ -82,7 +87,6 @@ void getDateTime (int* h, int* m, int* s)
 }*/
 #endif
 
-Navigation::ElectroincMap elMap;
 
 double coords[][3] = {
     { 55.624846, 37.677687, 0 },
@@ -565,8 +569,8 @@ void getParamsFromConsole ()
         if (cmd.at(0) == "z")
         {
             static int i = 0;
-            elMap.setMetrometer (coords[i][2]);
-            elMap.checkMap (coords[i][0], coords[i][1]);
+            elMap->setMetrometer (coords[i][2]);
+            elMap->checkMap (coords[i][0], coords[i][1]);
             i ++;
         }
         else if (cmd.at(0) == "s")
@@ -695,12 +699,14 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
+    elMap = new Navigation::ElectroincMap();
 
 #ifdef WITH_CAN
     //QtConcurrent::run(getParamsFromCan);
     //Здесь подключаюсь я.
     iodriver = new iodrv(systemState);
     speedAgregator = new SpeedAgregator();
+    emapCanEmitter = new EMapCanEmitter();
 
     // Создание и подключение «обработчиков»
     // -> Отбработчик нажатия РМП <-
@@ -769,6 +775,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
     // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
 
+    // Электронная карта
+    QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
+    QObject::connect (emapCanEmitter, SIGNAL(sendNextObjectToCan(can_frame)), iodriver, SLOT(slot_write_can0_message(can_frame)));
+
     iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
 
 #else
@@ -778,12 +788,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     printf("\033[0;36;40m HELLO!!!\033[0;37;40m");
 
-    elMap.load ("./map.gps");
-    elMap.setTrackNumber(2);
+    elMap->load ("./map.gps");
+    elMap->setTrackNumber(2);
     for (int i = 0; i < 400; i++)
     {
-        elMap.setMetrometer (coords[i][2]);
-        elMap.checkMap (coords[i][0], coords[i][1]);
+        elMap->setMetrometer (coords[i][2]);
+        elMap->checkMap (coords[i][0], coords[i][1]);
         //getc(stdin);
     }
 
