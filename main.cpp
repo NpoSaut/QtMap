@@ -6,6 +6,9 @@
 #include <QTextCodec>
 
 #include "masqarade.h"
+#ifdef WIN32
+    HANDLE winConsoleandler;
+#endif
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
@@ -204,7 +207,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #ifdef WIN32
     // Masqarade
     winConsoleandler = GetStdHandle(STD_OUTPUT_HANDLE);
+    system("chcp 65001");
 #endif
+    CPRINTF(CL_VIOLET_L, "ДОБРЫЙ ДЕНЬ\n");
 
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
