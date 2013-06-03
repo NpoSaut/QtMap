@@ -34,6 +34,10 @@ private:
     list<KilometerPost *> getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius);
 
     double x;
+    double l;
+
+    double lat1, lon1;
+
     int trackNumber;
 
     class ApproachingPoint
@@ -79,12 +83,14 @@ private:
 
     vector<EMapTarget> getNextObjects(const KilometerPost *startPost, double startPostX, int count = 10);
 
-    /**
-     * @brief getMyRail Находит путь, на котором ты окажешься
-     * @param post      Столб, для которого ты хочешь найти путь
-     * @return          Ссылку на путь, по которому поедешь, если он есть. Иначе null
-     */
     Rail *getMyRail(const KilometerPost *post);
+
+    KilometerPost *getCurrentKilometer();
+
+    int myDirection() { return getDirection (trackNumber, getCurrentKilometer()); }
+    static int getDirection(int trackNumber, KilometerPost *kilometer);
+
+    void checkOrdinate();
 
     int closestObjectX;
     void checkObjects();
@@ -92,6 +98,8 @@ private:
 public:
     explicit ElectroincMap(QObject *parent = 0);
     void load(QString fileName);
+
+    double ordinate;
 
 signals:
     void onPostDetected(KilometerPost post, double x);

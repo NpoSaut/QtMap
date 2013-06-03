@@ -5,10 +5,13 @@
 #include <QtConcurrentRun>
 #include <QTextStream>
 #include <QTextCodec>
+#include <QString>
+#include <QStringList>
 #include <qmlapplicationviewer.h>
 
 #include "systemstateviewmodel.h"
 #include "electroincmap.h"
+#include "masqarade.h"
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
@@ -681,12 +684,6 @@ void getParamsFromConsole ()
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
-
-#ifdef WIN32
-    // Masqarade
-    ch = GetStdHandle(STD_OUTPUT_HANDLE);
-#endif
-
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -795,21 +792,92 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     printf("\033[0;36;40m HELLO!!!\033[0;37;40m\n");
 
+    printf("\033[0;36;40m HELLO!!!\033[0;37;40m");
+
     elMap->load ("./map.gps");
     elMap->setTrackNumber(1);
 
-    int a = 150;
-    int b = 300;
-    int inc = (int)((b - a)/abs(b - a));
-    qDebug("Moving on %d -- %d with step: %2d\n", a, b, inc);
+    QFile canFile ("./can.txt");
+    canFile.open(QIODevice::ReadOnly);
 
-    for (int i = a; inc * i < inc * b; i += inc)
+    long lineNumber = 0;
+    QString s;
+    while ( (s = canFile.readLine ()).size () != 0 )
     {
-        qDebug() << "step " << i;
-        elMap->setMetrometer (coords[a][2] + inc * coords[i][2]);
-        elMap->checkMap (coords[i][0], coords[i][1]);
-        //getc(stdin);
+        lineNumber ++;
+        if ( lineNumber >= 600000 )
+        {
+            QStringList fields = s.split (" ", QString::SkipEmptyParts);
+            if ( fields.at (1).contains ("9983") ) // MY_DEBUG_A
+            {
+                int x = fields.at(2).toUInt (0,16) +
+                        fields.at(3).toUInt (0,16)*256 +
+                        fields.at(4).toUInt (0,16)*256*256;
+
+                if ( x >= 0x800000 )
+                    x |= (0xFF) << 3*8;
+
+                elMap->setMetrometer (x);
+            }
+            if ( fields.at (1).contains ("4268") ) // MM_ALT_LONG
+            {
+                int lat_i = fields.at (2).toUInt (0,16) + (fields.at (3).toUInt (0,16) << 8) + (fields.at (4).toUInt (0,16) << 16) + (fields.at (5).toUInt (0,16) << 24);
+                double lat = (double)lat_i * 10e-9 * 180 / 3.14159265359;
+
+                int lon_i =fields.at (6).toUInt (0,16) + (fields.at (7).toUInt (0,16) << 8) + (fields.at (8).toUInt (0,16) << 16) + ((fields.at (9).toUInt (0,16) & 0b01111111 ) << 24);
+                double lon = (double)lon_i * 10e-9 * 180 / 3.14159265359;
+
+                elMap->checkMap (lat, lon);
+            }
+            if ( fields.at (1).contains ("43E8")) // MM_STATE
+            {
+                int b2 = fields.at (3).toUInt (0, 16);
+                int b3 = fields.at (4).toUInt (0, 16);
+                int b4 = fields.at (5).toUInt (0, 16);
+                int b5 = fields.at (6).toUInt (0, 16);
+                int b6 = fields.at (7).toUInt (0, 16);
+                int b7 = fields.at (8).toUInt (0, 16);
+                int b8 = fields.at (9).toUInt (0, 16);
+
+                unsigned short x = b4 + b3*256;
+
+                CPRINTF(CL_CYAN, " CAN TARGET");
+                CPRINTF(CL_YELLOW, "%2d", b2 >> 4);
+                printf(" x: ");
+                CPRINTF(CL_YELLOW_L, "%6d", x);
+                printf(" ordinate: ");
+                CPRINTF(CL_CYAN, "%8d", b2 & 0xF);
+                CPRINTF(CL_GRAY, "     %02x %02x %02x %02x", (b5 & ~(1 << 6)), b6, b7, b8);
+                printf("\n");
+            }
+            if ( fields.at (1).contains ("C068")) // MM_SIGNAL
+            {
+                QString name;
+                char rname [8];
+                for (int i = 0; i < 8; i ++)
+                    rname[i] = fields.at (2+i).toUInt (0, 16);
+
+                QTextDecoder *cp1251Decoder = QTextCodec::codecForName("CP1251")->makeDecoder ();
+                name = cp1251Decoder->toUnicode (rname, 8).trimmed ();
+                CPRINTF(CL_RED, " --> %s\n", name.toStdString ().c_str ());
+            }
+            if ( fields.at (1).contains ("C0A3")) // MM_COORD
+            {
+                unsigned int o =  fields.at(4).toUInt (0, 16) +
+                        fields.at(3).toUInt (0,16)*256 +
+                        fields.at(2).toUInt (0,16)*256*256;
+
+                printf(" __)ORDINATE(__  ");
+                CPRINTF(CL_GREEN, "%8.0f", elMap->ordinate);
+                printf("  ");
+                CPRINTF(CL_CYAN,  "%8d", o);
+                printf("  delta: ");
+                CPRINTF(CL_YELLOW,  "%8.0f", elMap->ordinate - o);
+                printf("\n");
+            }
+        }
     }
+
 
     return app->exec();
 }

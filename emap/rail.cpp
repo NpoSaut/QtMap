@@ -5,7 +5,7 @@ using namespace Navigation;
 Rail *Rail::loadFrom(QByteArray rawData, int offset, int index)
 {
     Rail *rail = new Rail();
-    RawRailData data = *((RawRailData UNALIGNED *) (rawData.data () + offset + index * RawRailDataSize));
+    RawRailData data = *((RawRailData *) (rawData.data () + offset + index * RawRailDataSize));
     rail->number = data.number;
 
     if (rail->number > 0 && data.childObjectsAddress != 0xffffff) // признак существования пути

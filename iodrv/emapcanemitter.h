@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QMutex>
 
+#include "packing.h"
 #include "emap/railobject.h"
 #include "emap/emaptarget.h"
 
@@ -21,18 +22,7 @@ class EMapCanEmitter : public QObject
 public:
     explicit EMapCanEmitter(QObject *parent = 0);
     
-signals:
-    void sendNextObjectToCan(can_frame frame);
-    
-public slots:
-    void setObjectsList (const std::vector<EMapTarget> &objects);
-
-private:
-    QTimer timer;
-    QMutex mutex;
-    std::vector<EMapTarget> sendingObjects, receivedObjects;
-    int step;
-
+    PACKED(
     struct CanMessageData
     {
         unsigned int errors                     :8;
@@ -53,7 +43,21 @@ private:
         unsigned int pullforthForPassengerTrain :1;
         unsigned int conditionallyAllow         :1;
         unsigned int targetSpeed                :8;
-    }  __attribute__((packed));
+    });
+
+    static CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
+signals:
+    void sendNextObjectToCan(can_frame frame);
+    
+public slots:
+    void setObjectsList (const std::vector<EMapTarget> &objects);
+
+private:
+    QTimer timer;
+    QMutex mutex;
+    std::vector<EMapTarget> sendingObjects, receivedObjects;
+    int step;
+
 
 private slots:
     void engine ();
