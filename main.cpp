@@ -789,8 +789,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     printf("\033[0;36;40m HELLO!!!\033[0;37;40m\n");
 
-    elMap.load ("./map.gps");
-    elMap.setTrackNumber(1);
+    elMap->load ("./map.gps");
+    elMap->setTrackNumber(1);
 
     int a = 150;
     int b = 300;
@@ -800,8 +800,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     for (int i = a; inc * i < inc * b; i += inc)
     {
         qDebug() << "step " << i;
-        elMap.setMetrometer (coords[a][2] + inc * coords[i][2]);
-        elMap.checkMap (coords[i][0], coords[i][1]);
+        elMap->setMetrometer (coords[a][2] + inc * coords[i][2]);
+        elMap->checkMap (coords[i][0], coords[i][1]);
         //getc(stdin);
     }
 
