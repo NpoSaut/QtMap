@@ -5,6 +5,8 @@
 #include <QTextStream>
 #include <QTextCodec>
 
+#include "masqarade.h"
+
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
 #endif
