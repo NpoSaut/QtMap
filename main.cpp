@@ -681,6 +681,12 @@ void getParamsFromConsole ()
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
+
+#ifdef WIN32
+    // Masqarade
+    ch = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
+
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
