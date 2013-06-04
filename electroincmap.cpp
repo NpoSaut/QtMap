@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QTextCodec>
 
+#include "masqarade.h"
+
 #include "electroincmap.h"
 
 #include "masqarade.h"

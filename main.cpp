@@ -11,7 +11,11 @@
 
 #include "systemstateviewmodel.h"
 #include "electroincmap.h"
+
 #include "masqarade.h"
+#ifdef WIN32
+    HANDLE winConsoleandler;
+#endif
 
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
@@ -684,6 +688,14 @@ void getParamsFromConsole ()
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
+
+#ifdef WIN32
+    // Masqarade
+    winConsoleandler = GetStdHandle(STD_OUTPUT_HANDLE);
+    system("chcp 65001");
+#endif
+    CPRINTF(CL_VIOLET_L, "ДОБРЫЙ ДЕНЬ\n");
+
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -789,10 +801,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #endif
 
     //system("chcp 65001");
-
-    printf("\033[0;36;40m HELLO!!!\033[0;37;40m\n");
-
-    printf("\033[0;36;40m HELLO!!!\033[0;37;40m");
 
     elMap->load ("./map.gps");
     elMap->setTrackNumber(1);
