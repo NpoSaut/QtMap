@@ -22,7 +22,7 @@ class ElectroincMap : public QObject
 
 private:
     bool firstEnter;
-    vector<KilometerPost *> allPosts;
+    list<KilometerPost *> allPosts;
     list<RouteSection *> sections;
 
     list<KilometerPost *> nearPosts;
@@ -31,7 +31,7 @@ private:
     double departX;
 
     list<KilometerPost *> getPostsInArea(double lat, double lon, double radius);
-    list<KilometerPost *> getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius);
+    list<KilometerPost *> getPostsInArea(list<KilometerPost *> &source, double lat, double lon, double radius);
 
     double x;
     double l;

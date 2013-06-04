@@ -796,6 +796,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     elMap->load ("./map.gps");
     elMap->setTrackNumber(1);
+    qDebug () << "Ready";
 
     QFile canFile ("./can.txt");
     canFile.open(QIODevice::ReadOnly);
@@ -877,7 +878,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
             }
         }
     }
-
 
     return app->exec();
 }

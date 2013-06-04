@@ -1,7 +1,7 @@
 #ifndef RAIL_H
 #define RAIL_H
 
-#include <vector>
+#include <list>
 using namespace std;
 
 #include <QByteArray>
@@ -26,14 +26,14 @@ public:
 
     KilometerIncreaseDirectoin direction;
 
-    const vector<RailObject *> &getObjects () const { return objects; }
+    const list<RailObject *> &getObjects () const { return objects; }
     unsigned int getNumber () const { return number; }
     bool isExist () const { return existence; }
     static KilometerIncreaseDirectoin getDirectoin(int railNumber);
 
 private:
     KilometerPost *kilometerPost;
-    vector<RailObject *> objects;
+    list<RailObject *> objects;
     unsigned int number;
     bool existence;
 

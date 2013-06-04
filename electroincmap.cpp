@@ -71,7 +71,6 @@ void ElectroincMap::load(QString fileName)
             sectionId++;
         }
     }
-    qDebug() << sections.front ()->posts[0]->rails.at(1)->getObjects()[0]->getName();
 }
 
 void ElectroincMap::setMetrometer(double value)
@@ -123,7 +122,7 @@ void ElectroincMap::checkMap(double lat, double lon)
     }
 
     // Находим ближайшие столбы
-    list<KilometerPost *> nextPosts = getPostsInArea(lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
+    list<KilometerPost *> nextPosts = getPostsInArea(nearPosts, lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
 
     nextPosts.remove(departPost);       // Удаляем оттуда столб отправления
     syncPostApproaches(nextPosts);      // синхронизируем список приближений
@@ -171,6 +170,8 @@ void ElectroincMap::checkMap(double lat, double lon)
 
         double l0 = abs(targetPost->ordinate - departPost->ordinate);
 
+        if (  abs(abs(x - departX) - l0) > 200)
+        {
         CPRINTF(CL_WHITE_L, "FIXED TO POST: ");
         CPRINTF(CL_RED_L, "%5.3f", targetPostApproach->post->ordinate / 1000.0);
         CPRINTF(CL_WHITE, "км\tx: ");
@@ -183,8 +184,10 @@ void ElectroincMap::checkMap(double lat, double lon)
         CPRINTF(CL_WHITE, "м");
 
         CPRINTF(CL_GRAY,    "  LENGTH2 ");
-        CPRINTF(CL_GREEN, "%4.0f", l - l0); l = 0;
+        CPRINTF(CL_GREEN, "%4.0f", l - l0);
         CPRINTF(CL_GRAY, "м\n");
+        }
+        l = 0;
 
         departPost = targetPostApproach->post;
         departX    = targetPostApproach->getX();
@@ -352,11 +355,11 @@ list<KilometerPost *> ElectroincMap::getPostsInArea(double lat, double lon, doub
 {
     return getPostsInArea(allPosts, lat, lon, radius);
 }
-list<KilometerPost *> ElectroincMap::getPostsInArea(vector<KilometerPost *> &source, double lat, double lon, double radius)
+list<KilometerPost *> ElectroincMap::getPostsInArea(list<KilometerPost *> &source, double lat, double lon, double radius)
 {
     list<KilometerPost *> res;
 
-    double radiusEstimation = KilometerPost::metersToEstimation(radius);
+//    double radiusEstimation = KilometerPost::metersToEstimation(radius);
     foreach (KilometerPost *p, source) {
         //if (p.estimateDistanceTo(lat, lon) <= radiusEstimation)
         if (p->distanceTo (lat, lon) <= radius)
@@ -482,7 +485,8 @@ double ElectroincMap::PostApproach::estimateApproaching()
         {
             double dr = ap.r - prewPoint.r;
             double dx = ap.x - prewPoint.x;
-            sumSlope = sumSlope * 0.7 + (-dr/dx) * 0.3;
+            if (dx != 0)
+                sumSlope = sumSlope * 0.7 + (-dr/dx) * 0.3;
         }
         prewPoint = ap;
         isFirstPoint = false;
