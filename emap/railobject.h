@@ -22,7 +22,7 @@ public:
           name ()
     {}
 
-    static RailObject *loadFrom (QByteArray rawData, int offset, int index);
+    static RailObject *loadFrom (const QByteArray &rawData, int offset, int index);
 
     void setParentRoad (Rail *parentRail) { RailObject::parentRail = parentRail; }
     Rail *getParentRail () const { return parentRail; }

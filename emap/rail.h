@@ -19,7 +19,7 @@ public:
         : kilometerPost (nullptr), objects(), number(0), existence (false)
     {}
 
-    static Rail *loadFrom (QByteArray rawData, int offset, int index);
+    static Rail *loadFrom (const QByteArray &rawData, int offset, int index);
 
     void setKilometerPost (KilometerPost *kilometerPost) { Rail::kilometerPost = kilometerPost; }
     KilometerPost *getKilometerPost () const { return kilometerPost; }

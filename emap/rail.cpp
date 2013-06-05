@@ -2,7 +2,7 @@
 
 using namespace Navigation;
 
-Rail *Rail::loadFrom(QByteArray rawData, int offset, int index)
+Rail *Rail::loadFrom(const QByteArray &rawData, int offset, int index)
 {
     Rail *rail = new Rail();
     RawRailData data = *((RawRailData *) (rawData.data () + offset + index * RawRailDataSize));
