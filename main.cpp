@@ -24,67 +24,6 @@ SpeedAgregator* speedAgregator;
 rmp_key_handler* rmp_key_hdlr;
 #endif
 
-
-
-/*void getSpeed (double* speed)
-{
-    systemState->setSpeed( int(*speed) );
-}
-
-void getSpeedLimits (int* val)
-{
-    systemState->setSpeedRestriction(*val);
-}
-
-void getLights (int* code)
-{
-    systemState->setLight(*code-1);
-}
-
-void getAlsn (int* code)
-{
-    if (*code == 0)
-        systemState->setAlsnFreq(50);
-    else if (*code == 1)
-        systemState->setAlsnFreq(75);
-    else if (*code == 2)
-        systemState->setAlsnFreq(50);
-    else if (*code == 3)
-        systemState->setAlsnFreq(25);
-}
-
-void getMilage (int* val)
-{
-    systemState->setMilage( (*val)/1000 );
-}
-
-void getGps (double* lat, double* lon)
-{
-    systemState->setLongitude(*lon);
-    systemState->setLatitude(*lat);
-}
-
-void getDateTime (int* h, int* m, int* s)
-{
-    QString date = QString("%1:%2:%3").arg(*h).arg(*m).arg(*s);
-    systemState->setTime(date);
-}*/
-
-#ifdef WITH_CAN
-//extern void aFunction();
-//QFuture<void> future = QtConcurrent::run(aFunction);
-/*void getParamsFromCan ()
-{
-    sktcanl_init();
-    sktcanl_set_callbacks(getSpeed, getSpeedLimits, NULL, NULL, getLights, getAlsn, getMilage, NULL, NULL, getGps, getDateTime);
-
-    while (true)
-    {
-        sktcanl_read_can_msg();
-    }
-}*/
-#endif
-
 void getParamsFromConsole ()
 {
     QString str;
@@ -252,8 +191,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // Переносить ли эти события из iodrv в обработчики
     QObject::connect(iodriver, SIGNAL(signal_iron_wheels(bool)), systemState, SLOT(setIronWheels(bool)));
 
-
-
     // Для отладки
     QObject::connect(iodriver, SIGNAL(signal_speed_earth(double)), systemState, SLOT(setSpeedFromEarth(double)));
     QObject::connect(iodriver, SIGNAL(signal_speed_sky(double)), systemState, SLOT(setSpeedFromSky(double)));
@@ -276,7 +213,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreqFact(int)));
 
-    //QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), systemState, SLOT(setDriveModeFact(int)));
     QObject::connect(iodriver, SIGNAL(signal_vigilance(bool)), systemState, SLOT(setIsVigilanceRequired(bool)));
     QObject::connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT(setDirection(int)));
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(bool)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
@@ -294,14 +230,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(iodriver, SIGNAL(signal_traction(bool)), systemState, SLOT(setIsTractionOn(bool)));
 
-    //QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
-    //QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), iodriver, SLOT(slot_rmp_key_down()));
-    //QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonReleased()), iodriver, SLOT(slot_rmp_key_up()));
-
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
 
     iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
 
