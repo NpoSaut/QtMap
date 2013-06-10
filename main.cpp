@@ -197,7 +197,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(rmp_key_hdlr, SIGNAL(target_driving_mode_changed(int)), systemState, SLOT(setDriveModeTarget(int)));
     QObject::connect(rmp_key_hdlr, SIGNAL(actual_driving_mode_changed(int)), systemState, SLOT(setDriveModeFact(int)));
-    QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
+//    QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
     // <- Отбработчик нажатия РМП ->
 
     // Переносить ли эти события из iodrv в обработчики
@@ -230,7 +230,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(bool)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
 
     QObject::connect(iodriver, SIGNAL(signal_autolock_type(int)), systemState, SLOT(setAutolockTypeFact(int)));
-    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged()), iodriver, SLOT(slot_autolock_type_target_changed()));
+//    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged()), iodriver, SLOT(slot_autolock_type_target_changed()));
 
     QObject::connect(iodriver, SIGNAL(signal_pressure_tc(QString)), systemState, SLOT(setPressureTC(QString)));
     QObject::connect(iodriver, SIGNAL(signal_pressure_tm(QString)), systemState, SLOT(setPressureTM(QString)));
@@ -242,10 +242,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(iodriver, SIGNAL(signal_traction(bool)), systemState, SLOT(setIsTractionOn(bool)));
 
-    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
-    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
+//    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
+//    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
 
     // Электронная карта
+    QObject::connect (iodriver, SIGNAL(signal_orig_passed_distance(int)), elMap, SLOT(setMetrometer(int)));
+    QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
     QObject::connect (emapCanEmitter, SIGNAL(sendNextObjectToCan(can_frame)), iodriver, SLOT(slot_write_can0_message(can_frame)));
 
@@ -255,92 +257,15 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QtConcurrent::run(getParamsFromConsole);
 #endif
 
-    //system("chcp 65001");
-
+    qDebug() << "Loading map...";
     elMap->load ("./map.gps");
-    elMap->setTrackNumber(1);
-    qDebug () << "Ready";
+    qDebug() << "Map loaded.";
+    qDebug() << "Set track number 2";
+    elMap->setTrackNumber(2);
+    qDebug () << "Track number seted to 2";
 
-    QFile canFile ("./can.txt");
-    canFile.open(QIODevice::ReadOnly);
-
-    long lineNumber = 0;
-    QString s;
-    while ( (s = canFile.readLine ()).size () != 0 )
-    {
-        lineNumber ++;
-        if ( lineNumber >= 600000 )
-        {
-            QStringList fields = s.split (" ", QString::SkipEmptyParts);
-            if ( fields.at (1).contains ("9983") ) // MY_DEBUG_A
-            {
-                int x = fields.at(2).toUInt (0,16) +
-                        fields.at(3).toUInt (0,16)*256 +
-                        fields.at(4).toUInt (0,16)*256*256;
-
-                if ( x >= 0x800000 )
-                    x |= (0xFF) << 3*8;
-
-                elMap->setMetrometer (x);
-            }
-            if ( fields.at (1).contains ("4268") ) // MM_ALT_LONG
-            {
-                int lat_i = fields.at (2).toUInt (0,16) + (fields.at (3).toUInt (0,16) << 8) + (fields.at (4).toUInt (0,16) << 16) + (fields.at (5).toUInt (0,16) << 24);
-                double lat = (double)lat_i * 10e-9 * 180 / 3.14159265359;
-
-                int lon_i =fields.at (6).toUInt (0,16) + (fields.at (7).toUInt (0,16) << 8) + (fields.at (8).toUInt (0,16) << 16) + ((fields.at (9).toUInt (0,16) & 0b01111111 ) << 24);
-                double lon = (double)lon_i * 10e-9 * 180 / 3.14159265359;
-
-                elMap->checkMap (lat, lon);
-            }
-            if ( fields.at (1).contains ("43E8")) // MM_STATE
-            {
-                int b2 = fields.at (3).toUInt (0, 16);
-                int b3 = fields.at (4).toUInt (0, 16);
-                int b4 = fields.at (5).toUInt (0, 16);
-                int b5 = fields.at (6).toUInt (0, 16);
-                int b6 = fields.at (7).toUInt (0, 16);
-                int b7 = fields.at (8).toUInt (0, 16);
-                int b8 = fields.at (9).toUInt (0, 16);
-
-                unsigned short x = b4 + b3*256;
-
-                CPRINTF(CL_CYAN, " CAN TARGET");
-                CPRINTF(CL_YELLOW, "%2d", b2 >> 4);
-                printf(" x: ");
-                CPRINTF(CL_YELLOW_L, "%6d", x);
-                printf(" ordinate: ");
-                CPRINTF(CL_CYAN, "%8d", b2 & 0xF);
-                CPRINTF(CL_GRAY, "     %02x %02x %02x %02x", (b5 & ~(1 << 6)), b6, b7, b8);
-                printf("\n");
-            }
-            if ( fields.at (1).contains ("C068")) // MM_SIGNAL
-            {
-                QString name;
-                char rname [8];
-                for (int i = 0; i < 8; i ++)
-                    rname[i] = fields.at (2+i).toUInt (0, 16);
-
-                QTextDecoder *cp1251Decoder = QTextCodec::codecForName("CP1251")->makeDecoder ();
-                name = cp1251Decoder->toUnicode (rname, 8).trimmed ();
-                CPRINTF(CL_RED, " --> %s\n", name.toStdString ().c_str ());
-            }
-            if ( fields.at (1).contains ("C0A3")) // MM_COORD
-            {
-                unsigned int o =  fields.at(4).toUInt (0, 16) +
-                        fields.at(3).toUInt (0,16)*256 +
-                        fields.at(2).toUInt (0,16)*256*256;
-
-                printf(" __)ORDINATE(__  ");
-                CPRINTF(CL_GREEN, "%8.0f", elMap->ordinate);
-                printf("  ");
-                CPRINTF(CL_CYAN,  "%8d", o);
-                printf("  delta: ");
-                CPRINTF(CL_YELLOW,  "%8.0f", elMap->ordinate - o);
-                printf("\n");
-            }
-        }
-    }
+//    elMap->setMetrometer (0);
+//    elMap->checkMap (56.7942, 59.4909);
 
     return app->exec();
 }

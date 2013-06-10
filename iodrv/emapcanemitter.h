@@ -28,7 +28,8 @@ public:
         unsigned int errors                     :8;
         unsigned int number                     :4;
         unsigned int type                       :4;
-        unsigned int x                          :16;
+        unsigned int xHight                     :8;
+        unsigned int xLow                       :8;
         unsigned int lengthHighByte             :4;
         unsigned int                            :1;
         unsigned int radioChanel                :1;

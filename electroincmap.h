@@ -21,6 +21,12 @@ class ElectroincMap : public QObject
 
 
 private:
+    bool mapLoaded;
+    bool xReceived;
+
+    bool isLocated;
+    void setIsLocated(bool val);
+
     bool firstEnter;
     list<KilometerPost *> allPosts;
     list<RouteSection *> sections;
@@ -104,9 +110,10 @@ public:
 signals:
     void onPostDetected(KilometerPost post, double x);
     void onUpcomingTargets(std::vector<EMapTarget>);
+    void isLocatedChanged();
 
 public slots:
-    void setMetrometer(double value);
+    void setMetrometer(int value);
     void setTrackNumber(int value);
     void checkMap(double lat, double lon);
 };

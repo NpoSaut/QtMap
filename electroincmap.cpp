@@ -24,7 +24,8 @@ ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
     firstEnter(true),
     x(0), ordinate(0),
-    departPost(nullptr), targetPost(nullptr)
+    departPost(nullptr), targetPost(nullptr),
+    xReceived(false), mapLoaded(false), isLocated(false)
 { }
 
 
@@ -73,13 +74,17 @@ void ElectroincMap::load(QString fileName)
             sectionId++;
         }
     }
+
+    mapLoaded = true;
 }
 
-void ElectroincMap::setMetrometer(double value)
+void ElectroincMap::setMetrometer(int value)
 {
     if (value != x)
         x = value;
     checkOrdinate();
+    xReceived = true;
+//    CPRINTF(CL_BLUE_L, "x = %7.0f\n", x);
 }
 
 void ElectroincMap::setTrackNumber(int value)
@@ -91,13 +96,35 @@ void ElectroincMap::setTrackNumber(int value)
 
 void ElectroincMap::checkMap(double lat, double lon)
 {
-    printf(" lat %7.4f lon %7.4f  x: ", lat, lon);
+    system ("clear");
+    qDebug() << "...";
+    printf(" lat %7.4f lon %7.4f  x: ", lat, lon); fflush(stdout);
+
+    if (!mapLoaded)
+    {
+        CPRINTF(CL_RED, " -- map not loaded\n");
+        return;
+    }
+
+    if (!xReceived)
+    {
+        CPRINTF(CL_RED, " -- не задан x\n");
+        return;
+    }
     CPRINTF(CL_CYAN_L, "%4.0f", x);
+
 
     l += KilometerPost::distanceBetween (lat, lon, lat1, lon1);
     lat1 = lat; lon1 = lon;
 
     nearPosts = getPostsInArea(lat, lon, 10000);
+
+    if (nearPosts.size () == 0)
+    {
+        CPRINTF(CL_RED_L, " -- нет столбов в 10 км от нас\n");
+        setIsLocated (false);
+        return;
+    }
 
     if (firstEnter)
     {
@@ -106,7 +133,7 @@ void ElectroincMap::checkMap(double lat, double lon)
         double closestDist = 1e20;
         foreach (KilometerPost *p, nearPosts)
         {
-            if (p != departPost)
+            if (p != departPost && p->position == kpp_middle)
             {
                 double d = p->distanceTo(lat, lon);
                 if (d < closestDist)
@@ -119,6 +146,7 @@ void ElectroincMap::checkMap(double lat, double lon)
         targetPost = closestPost;
         departPost = projectNextPost(targetPost, true);
         departX = x - departPost->distanceTo(lat, lon);
+        setIsLocated (true);
 
         firstEnter = false;
     }
@@ -140,15 +168,20 @@ void ElectroincMap::checkMap(double lat, double lon)
     // Постараемся найти приближение для целевого поста
     PostApproach *targetPostApproach = nullptr;
     foreach (PostApproach *pa, postApproaches)
+    {
+//        CPRINTF(CL_WHITE, "   searching tpa: %8.0f  -- %8.0f\n", pa->post->ordinate, targetPost->ordinate);;
         if (pa->post == targetPost)
             targetPostApproach = pa;
+    }
 
     printf(" target: ");
     SET_COLOR(CL_YELLOW_L, CL_BLACK);
-    if (targetPostApproach == nullptr) printf("null");
+    if (targetPostApproach == nullptr){ printf("null");fflush(stdout);}
     else printf("%5.0f", targetPost->ordinate);
     RESET_COLOR;
     printf(" appr: ");
+    qDebug() << "^(o,o)^";
+    qDebug() << postApproaches.size ();
     CPRINTF(CL_GREEN_L, "%5.2f", targetPostApproach->approachingSpeed);
     printf("\n");
 
@@ -169,11 +202,6 @@ void ElectroincMap::checkMap(double lat, double lon)
     {
 
         // Трубим
-
-        double l0 = abs(targetPost->ordinate - departPost->ordinate);
-
-        if (  abs(abs(x - departX) - l0) > 200)
-        {
         CPRINTF(CL_WHITE_L, "FIXED TO POST: ");
         CPRINTF(CL_RED_L, "%5.3f", targetPostApproach->post->ordinate / 1000.0);
         CPRINTF(CL_WHITE, "км\tx: ");
@@ -182,18 +210,17 @@ void ElectroincMap::checkMap(double lat, double lon)
         CPRINTF(CL_GREEN_L, "%3.0f", targetPostApproach->minimalApproach);
         CPRINTF(CL_WHITE, "м");
         CPRINTF(CL_GRAY,    "  LENGTH ");
-        CPRINTF(CL_CYAN, "%4.0f", abs(x - departX) - l0);
+        CPRINTF(CL_CYAN, "%4.0f", abs(x - departX));
         CPRINTF(CL_WHITE, "м");
 
         CPRINTF(CL_GRAY,    "  LENGTH2 ");
-        CPRINTF(CL_GREEN, "%4.0f", l - l0);
+        CPRINTF(CL_GREEN, "%4.0f", l);     l = 0;
         CPRINTF(CL_GRAY, "м\n");
-        }
-        l = 0;
 
         departPost = targetPostApproach->post;
         departX    = targetPostApproach->getX();
         emit onPostDetected(*departPost, departX);
+        setIsLocated (true);
 
         KilometerPost *p = projectNextPost(departPost);
 
@@ -282,7 +309,8 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
 //                CPRINTF(CL_GREEN, "*");
                 EMapTarget target(o, objectX);
                 res.push_back(target);
-            } // else printf(" ");
+            }
+//          else printf(" ");
             if (res.size() >= count) break;     // Прерываем цикл, если набрали достаточное количество целей
         }
 //        printf("\n");
@@ -327,7 +355,8 @@ void ElectroincMap::checkObjects()
 
 //    CPRINTF(CL_CYAN, "   [%5.0f --> %5.0f] by KP ", departPost->ordinate, targetPost->ordinate);
 //    CPRINTF(CL_CYAN_L, "%5.0f", currentKilometer->ordinate);
-//    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate)
+//    CPRINTF(CL_CYAN, " departX %.0f м\n", departX);
+//    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate);
     vector<EMapTarget> targets = getNextObjects(currentKilometer, departX + (departPost->ordinate - currentKilometer->ordinate));
     foreach (EMapTarget t, targets) {
         CPRINTF(CL_GREEN , "     TARGET");
@@ -337,13 +366,17 @@ void ElectroincMap::checkObjects()
         printf(" ordinate: ");
         CPRINTF(CL_CYAN, "%8d", t.object->getOrdinate());
 
-        EMapCanEmitter::CanMessageData ima= EMapCanEmitter::encodeEMapTarget (t);
-        unsigned char *msg = (unsigned char *) &ima;
-        CPRINTF(CL_GRAY, "     %02x %02x %02x %02x", msg[4], msg[5], msg[6], msg[7]);
+        printf(" dist: ");
+        CPRINTF(CL_CYAN_L, "%4.0f", t.x - x);
+
+//        EMapCanEmitter::CanMessageData ima= EMapCanEmitter::encodeEMapTarget (t);
+//        unsigned char *msg = (unsigned char *) &ima;
+//        CPRINTF(CL_GRAY, "     %02x %02x %02x %02x", msg[4], msg[5], msg[6], msg[7]);
 
         CPRINTF(CL_VIOLET, "   %s", t.object->getName ().toStdString ().c_str ());
         printf("\n");
     }
+    emit onUpcomingTargets (targets);
 }
 
 // Рассчитывает вес для точки приближения
@@ -450,6 +483,10 @@ double ElectroincMap::PostApproach::parabolizeX(vector<ElectroincMap::Approachin
 const double approachIncreaseLimit = 30; // м
 bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoint ap)
 {
+    foreach (ApproachingPoint iap, aPoints) {
+        if (ap.x == iap.x) return false;
+    }
+
     // Удаляем все лишние точки
     while (aPoints.size() >= 20)
         aPoints.pop_front();
@@ -495,4 +532,14 @@ double ElectroincMap::PostApproach::estimateApproaching()
     }
     //sumSlope /= aPoints.size();
     return sumSlope;
+}
+
+
+void ElectroincMap::setIsLocated(bool val)
+{
+    if (val != isLocated)
+    {
+        isLocated = val;
+        emit isLocatedChanged();
+    }
 }

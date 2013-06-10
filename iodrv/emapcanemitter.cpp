@@ -1,6 +1,7 @@
 #if defined WITH_CAN
 
 #include "emapcanemitter.h"
+#include <QDebug>
 
 using namespace std;
 using namespace Navigation;
@@ -22,7 +23,8 @@ EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget
     canMessage.errors = 0;
     canMessage.number = targetNumber;
     canMessage.type = t.object->getType ();
-    canMessage.x = t.x;
+    canMessage.xLow = t.x & 0xFF;
+    canMessage.xHight = t.x >> 8;
     canMessage.radioChanel = t.object->isRadioChannel ();
     canMessage.station = 0; // ??? Откуда взять
     canMessage.alsEn = t.object->isAlsEn ();
@@ -49,13 +51,17 @@ void EMapCanEmitter::engine()
     }
 
     if (step < sendingObjects.size ())
+//    if (step < sendingObjects.size () && step == 0)
     {
         can_frame canFrame;
-        canFrame.can_id = 0x21F; // 0x43E8
+        canFrame.can_id = 0x422; // 0x8448
+//        canFrame.can_id = 0x21F; // 0x43E8
         canFrame.can_dlc = 8;
 
         CanMessageData &canMessage = *((CanMessageData *) &canFrame.data);
         canMessage = encodeEMapTarget(sendingObjects[step], step); // Это просто очень плохо
+
+//        qDebug() << "target: " << sendingObjects[step].x << " .." << canFrame.data[2] << " " << canFrame.data[3];
 
         emit sendNextObjectToCan (canFrame);
 

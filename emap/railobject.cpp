@@ -57,6 +57,7 @@ RailObject *RailObject::loadFrom(const QByteArray &rawData, int offset, int inde
     case Switch:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->name = cp1251Decoder->toUnicode (data.name, 8).trimmed ();
         break;
     case Tks:
         obj->alsEn = data.alsEn;
