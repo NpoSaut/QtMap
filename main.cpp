@@ -14,6 +14,8 @@
 #include "iodrv/iodrv.h"
 #endif
 
+#include "iodrv/can.h"
+
 #include <iostream>
 
 SystemStateViewModel *systemState ;
@@ -179,6 +181,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // -> Отбработчик нажатия РМП <-
     rmp_key_hdlr = new rmp_key_handler();
 
+    // Передача сообщения в новый CAN-класс
+    QObject::connect (iodriver, SIGNAL(signal_new_message(can_frame*)), &canDev, SLOT(receiveFromIoDrv(const can_frame*)));
+
     QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), rmp_key_hdlr, SLOT(rmp_key_pressed()));
     QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), rmp_key_hdlr, SLOT(ssps_mode_received(int)));
     QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), rmp_key_hdlr, SLOT(driving_mode_received(int)));
@@ -233,7 +238,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
 
-    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
+    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
 
 #else
     QtConcurrent::run(getParamsFromConsole);
