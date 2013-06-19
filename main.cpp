@@ -182,7 +182,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rmp_key_hdlr = new rmp_key_handler();
 
     // Передача сообщения в новый CAN-класс
-    QObject::connect (iodriver, SIGNAL(signal_new_message(can_frame*)), &canDev, SLOT(receiveFromIoDrv(const can_frame*)));
+    QObject::connect (iodriver, SIGNAL(signal_new_message(const can_frame*)), &canDev, SLOT(receiveFromIoDrv(const can_frame*)));
+    QObject::connect (&canDev, SIGNAL(transmitToIoDrv(const can_frame*)), iodriver, SLOT(slot_send_message(const can_frame*)));
 
     QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), rmp_key_hdlr, SLOT(rmp_key_pressed()));
     QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), rmp_key_hdlr, SLOT(ssps_mode_received(int)));
