@@ -78,6 +78,16 @@ void ElectroincMap::load(QString fileName)
     mapLoaded = true;
 }
 
+bool ElectroincMap::getIsLocated()
+{
+    return isLocated;
+}
+
+double ElectroincMap::getOrdinate()
+{
+    return ordinate;
+}
+
 void ElectroincMap::setMetrometer(int value)
 {
     if (value != x)
@@ -100,15 +110,27 @@ void ElectroincMap::checkMap(double lat, double lon)
     qDebug() << "...";
     printf(" lat %7.4f lon %7.4f  x: ", lat, lon); fflush(stdout);
 
-    if (!mapLoaded)
+    // Отменяем навигацию, если введён номер пути 0
+    if (trackNumber == 0)
     {
-        CPRINTF(CL_RED, " -- map not loaded\n");
+        CPRINTF(CL_GREEN, " -- карта отключена");
+        setIsLocated (false);
         return;
     }
 
+    // Отменяем навигацию, если карта не загружена
+    if (!mapLoaded)
+    {
+        CPRINTF(CL_RED, " -- map not loaded\n");
+        setIsLocated (false);
+        return;
+    }
+
+    // Отменяем навигацию, если не зада x
     if (!xReceived)
     {
         CPRINTF(CL_RED, " -- не задан x\n");
+        setIsLocated (false);
         return;
     }
     CPRINTF(CL_CYAN_L, "%4.0f", x);
@@ -119,6 +141,7 @@ void ElectroincMap::checkMap(double lat, double lon)
 
     nearPosts = getPostsInArea(lat, lon, 10000);
 
+    // Отменяем навигацию, если нет столбов по близости (нет карты данной местности)
     if (nearPosts.size () == 0)
     {
         CPRINTF(CL_RED_L, " -- нет столбов в 10 км от нас\n");
@@ -152,9 +175,10 @@ void ElectroincMap::checkMap(double lat, double lon)
     }
 
     // Находим ближайшие столбы
-    list<KilometerPost *> nextPosts = getPostsInArea(nearPosts, lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы, только к ним мы можем ехать сейчас
-
-    nextPosts.remove(departPost);       // Удаляем оттуда столб отправления
+    list<KilometerPost *> nextPosts = getPostsInArea(nearPosts, lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы,
+                                                                                     // только к ним мы можем ехать сейчас
+    if (departPost != nullptr)
+        nextPosts.remove(departPost);   // Удаляем оттуда столб отправления (на него мы не можем ехать)
     syncPostApproaches(nextPosts);      // синхронизируем список приближений
 
     // Вычисляем приближения для всех точек
@@ -169,38 +193,36 @@ void ElectroincMap::checkMap(double lat, double lon)
     PostApproach *targetPostApproach = nullptr;
     foreach (PostApproach *pa, postApproaches)
     {
-//        CPRINTF(CL_WHITE, "   searching tpa: %8.0f  -- %8.0f\n", pa->post->ordinate, targetPost->ordinate);;
         if (pa->post == targetPost)
             targetPostApproach = pa;
     }
 
     printf(" target: ");
-    SET_COLOR(CL_YELLOW_L, CL_BLACK);
-    if (targetPostApproach == nullptr){ printf("null");fflush(stdout);}
-    else printf("%5.0f", targetPost->ordinate);
-    RESET_COLOR;
+    if (targetPostApproach == nullptr) { CPRINTF(CL_RED_L, "null"); }
+    else { CPRINTF(CL_YELLOW_L, "%5.0f", targetPost->ordinate); }
     printf(" appr: ");
-    qDebug() << "^(o,o)^";
-    qDebug() << postApproaches.size ();
     CPRINTF(CL_GREEN_L, "%5.2f", targetPostApproach->approachingSpeed);
     printf("\n");
 
     // Смотрим, не нужно ли соскачить со столба
-    if (targetPostApproach == nullptr || (targetPostApproach->approachingSpeed < 0 && targetPostApproach->minimalApproach > 150))
+    if (targetPostApproach == nullptr ||
+            (targetPostApproach->approachingSpeed < 0 &&    // Соскакиваем, если мы удаляемся от столба
+             targetPostApproach->minimalApproach > 150))    // И максимальное приближение было более 150 метров
     {
         targetPostApproach = findBestApproach();
+        targetPost = targetPostApproach->post;
 
-        //targetPost = targetPostApproach->post;
         KilometerPost *p = projectNextPost(targetPost, true);
-        if (p == nullptr) departPost = findBestApproach()->post;
+        if (p == nullptr) setIsLocated(false);
         else departPost = p;
+
+        CPRINTF(CL_YELLOW_L, "      CHECKED TO [%8.0f  -->  %8.0f]", departPost->ordinate, targetPost->ordinate);
     }
 
 
     // Проверяем, не достигнут ли целевой столб
     if (targetPostApproach->achived)
     {
-
         // Трубим
         CPRINTF(CL_WHITE_L, "FIXED TO POST: ");
         CPRINTF(CL_RED_L, "%5.3f", targetPostApproach->post->ordinate / 1000.0);
@@ -217,22 +239,27 @@ void ElectroincMap::checkMap(double lat, double lon)
         CPRINTF(CL_GREEN, "%4.0f", l);     l = 0;
         CPRINTF(CL_GRAY, "м\n");
 
+        // Устанавливаем достигнутый пост как столб отправления
         departPost = targetPostApproach->post;
         departX    = targetPostApproach->getX();
-        emit onPostDetected(*departPost, departX);
+
+        // Устанавливаем признак "в карте"
         setIsLocated (true);
+        emit onPostDetected(*departPost, departX);
 
+        // Предугадываем следующий столю
         KilometerPost *p = projectNextPost(departPost);
-
+        // И если следующего столба нет (например, закончилась секция),
+        // то ищем вместо него наиболее подходящий
         if (p == nullptr) targetPost = findBestApproach()->post;
         else targetPost = p;
 
         CPRINTF(CL_WHITE_L, "NEXT: ");
         CPRINTF(CL_YELLOW_L, "%8.0f\n", targetPost->ordinate);
-
         printf("\n\n\n");
     }
 
+    // Пытаемся найти объекты
     checkObjects();
 }
 
@@ -273,10 +300,6 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
         }
     }
 
-    SET_COLOR(0xe, 0);
-    printf("      CHECKED to %5.0f\n", targetPostApproach->post->ordinate);
-    RESET_COLOR;
-
     return targetPostApproach;
 }
 
@@ -284,6 +307,7 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
 // Получает список ближайих целей
 vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost, double startPostX, int count)
 {
+    const int backBuffer = 300;
     vector<EMapTarget> res;
     double currentPostX = startPostX;
     const KilometerPost *currentPost = startPost;
@@ -304,7 +328,7 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
             // Вычисляем координату X объекта
             int objectX = (int)(currentPostX + currentRail->direction * currentPost->direction * (o->getOrdinate() - currentPost->ordinate));
 //            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
-            if (objectX >= x)       // Добавляем объект в список только если его координата X больше текущей
+            if (objectX >= x - backBuffer)       // Добавляем объект в список только если его координата X больше текущей
             {
 //                CPRINTF(CL_GREEN, "*");
                 EMapTarget target(o, objectX);
@@ -346,11 +370,19 @@ void ElectroincMap::checkOrdinate()
     if (departPost != nullptr)
     {
         ordinate = departPost->ordinate + myDirection() * (x - departX);
+        emit ordinateChanged();
     }
 }
 
 void ElectroincMap::checkObjects()
 {
+    if (!isLocated || targetPost == nullptr || departPost == nullptr)
+    {
+        // Если мы не спозиционированы, выплёвываем пустой результат
+        vector<EMapTarget> emptyTargets;
+        emit onUpcomingTargets(emptyTargets);
+    }
+
     KilometerPost *currentKilometer = getCurrentKilometer ();
 
 //    CPRINTF(CL_CYAN, "   [%5.0f --> %5.0f] by KP ", departPost->ordinate, targetPost->ordinate);
@@ -368,10 +400,6 @@ void ElectroincMap::checkObjects()
 
         printf(" dist: ");
         CPRINTF(CL_CYAN_L, "%4.0f", t.x - x);
-
-//        EMapCanEmitter::CanMessageData ima= EMapCanEmitter::encodeEMapTarget (t);
-//        unsigned char *msg = (unsigned char *) &ima;
-//        CPRINTF(CL_GRAY, "     %02x %02x %02x %02x", msg[4], msg[5], msg[6], msg[7]);
 
         CPRINTF(CL_VIOLET, "   %s", t.object->getName ().toStdString ().c_str ());
         printf("\n");

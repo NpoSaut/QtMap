@@ -101,16 +101,19 @@ private:
     int closestObjectX;
     void checkObjects();
 
+    double ordinate;
+
 public:
     explicit ElectroincMap(QObject *parent = 0);
     void load(QString fileName);
-
-    double ordinate;
+    bool getIsLocated();
+    double getOrdinate();
 
 signals:
     void onPostDetected(KilometerPost post, double x);
     void onUpcomingTargets(std::vector<EMapTarget>);
     void isLocatedChanged();
+    void ordinateChanged();
 
 public slots:
     void setMetrometer(int value);
