@@ -1,22 +1,21 @@
+#include <iostream>
+
 #include <QApplication>
-#include "qmlapplicationviewer.h"
-#include "systemstateviewmodel.h"
-#include "qtconcurrentrun.h"
 #include <QTextStream>
 #include <QTextCodec>
+#include <QtConcurrentRun>
 
+#include "systemstateviewmodel.h"
+#include "qmlapplicationviewer.h"
+#include "iodrv/can.h"
+#ifdef WITH_CAN
+#include "iodrv/iodrv.h"
+#endif
 #include "masqarade.h"
 #ifdef WIN32
     HANDLE winConsoleandler;
 #endif
-
-#ifdef WITH_CAN
-#include "iodrv/iodrv.h"
-#endif
-
-#include "iodrv/can.h"
-
-#include <iostream>
+#include "iodrv/cookies.h"
 
 SystemStateViewModel *systemState ;
 
@@ -238,6 +237,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
+
+    // Ввод параметров
+    QObject::connect (systemState, SIGNAL(TrackNumberChanged(int)), &cookies.trackNumberInMph, SLOT(setVaule(int)));
 
     iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
 
