@@ -30,8 +30,7 @@ public:
         unsigned int type                       :4;
         unsigned int xHight                     :8;
         unsigned int xLow                       :8;
-        unsigned int lengthHighByte             :4;
-        unsigned int                            :1;
+        unsigned int lengthHighByte             :5;
         unsigned int radioChanel                :1;
         unsigned int station                    :1;
         unsigned int alsEn                      :1;
