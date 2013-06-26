@@ -370,7 +370,7 @@ void ElectroincMap::checkOrdinate()
     if (departPost != nullptr)
     {
         ordinate = departPost->ordinate + myDirection() * (x - departX);
-        emit ordinateChanged();
+        emit ordinateChanged((int)ordinate);
     }
 }
 
@@ -568,6 +568,6 @@ void ElectroincMap::setIsLocated(bool val)
     if (val != isLocated)
     {
         isLocated = val;
-        emit isLocatedChanged();
+        emit isLocatedChanged(isLocated);
     }
 }

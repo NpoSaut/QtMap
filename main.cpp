@@ -6,11 +6,10 @@
 #include <QTextStream>
 #include <QTextCodec>
 #include <QString>
-#include <QStringList>
+#include <QtConcurrentRun>
 #include <qmlapplicationviewer.h>
 
 #include "systemstateviewmodel.h"
-#include "qmlapplicationviewer.h"
 #include "electroincmap.h"
 
 #include "masqarade.h"
