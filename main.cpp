@@ -17,8 +17,10 @@
     HANDLE winConsoleandler;
 #endif
 
+#include "iodrv/can.h"
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
+#include "iodrv/cookies.h"
 #include "iodrv/emapcanemitter.h"
 #endif
 
@@ -149,7 +151,6 @@ void getParamsFromConsole ()
 
 
 
-
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
 
@@ -191,12 +192,18 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // -> Отбработчик нажатия РМП <-
     rmp_key_hdlr = new rmp_key_handler();
 
+    // Передача сообщения в новый CAN-класс
+    qRegisterMetaType<CanFrame>("CanFrame");
+    QObject::connect (iodriver, SIGNAL(signal_new_message(CanFrame)), &canDev, SLOT(receiveFromIoDrv(CanFrame)));
+    QObject::connect (&canDev, SIGNAL(transmitToIoDrv(CanFrame)), iodriver, SLOT(slot_send_message(CanFrame)));
+
     QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), rmp_key_hdlr, SLOT(rmp_key_pressed()));
     QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), rmp_key_hdlr, SLOT(ssps_mode_received(int)));
     QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), rmp_key_hdlr, SLOT(driving_mode_received(int)));
 
     QObject::connect(rmp_key_hdlr, SIGNAL(target_driving_mode_changed(int)), systemState, SLOT(setDriveModeTarget(int)));
     QObject::connect(rmp_key_hdlr, SIGNAL(actual_driving_mode_changed(int)), systemState, SLOT(setDriveModeFact(int)));
+    QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
 //    QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
     // <- Отбработчик нажатия РМП ->
 
@@ -230,6 +237,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(bool)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
 
     QObject::connect(iodriver, SIGNAL(signal_autolock_type(int)), systemState, SLOT(setAutolockTypeFact(int)));
+    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged(int)), iodriver, SLOT(slot_autolock_type_target_changed(int)));
 //    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged()), iodriver, SLOT(slot_autolock_type_target_changed()));
 
     QObject::connect(iodriver, SIGNAL(signal_pressure_tc(QString)), systemState, SLOT(setPressureTC(QString)));
@@ -242,6 +250,27 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(iodriver, SIGNAL(signal_traction(bool)), systemState, SLOT(setIsTractionOn(bool)));
 
+    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
+    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
+
+    // Автоблокировка
+    QObject::connect(iodriver, SIGNAL(signal_autolock_type_target(int)), systemState, SLOT(setAutolockTypeTarget(int)));
+
+    // Ввод параметров
+    QObject::connect (systemState, SIGNAL(TrackNumberChanged(int)), &cookies.trackNumberInMph, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(MachinistNumberChanged(int)), &cookies.machinistNumber, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(TrainNumberChanged(int)), &cookies.trainNumber, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(AxlesCountChanged(int)), &cookies.lengthInWheels, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(WagonCountChanged(int)), &cookies.lengthInWagons, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(TrainMassChanged(int)), &cookies.mass, SLOT(setVaule(int)));
+    // Чтение параметров
+    QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), systemState, SLOT(setTrackNumber(int)));
+    QObject::connect (&cookies.machinistNumber, SIGNAL(onChange(int)), systemState, SLOT(setMachinistNumber(int)));
+    QObject::connect (&cookies.trainNumber, SIGNAL(onChange(int)), systemState, SLOT(setTrainNumber(int)));
+    QObject::connect (&cookies.lengthInWheels, SIGNAL(onChange(int)), systemState, SLOT(setAxlesCount(int)));
+    QObject::connect (&cookies.lengthInWagons, SIGNAL(onChange(int)), systemState, SLOT(setWagonCount(int)));
+    QObject::connect (&cookies.mass, SIGNAL(onChange(int)), systemState, SLOT(setTrainMass(int)));
+
 //    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
 //    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
 
@@ -251,7 +280,14 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
     QObject::connect (emapCanEmitter, SIGNAL(sendNextObjectToCan(can_frame)), iodriver, SLOT(slot_write_can0_message(can_frame)));
 
-    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
+    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
+
+    cookies.trackNumberInMph.requestValue ();
+    cookies.machinistNumber.requestValue ();
+    cookies.trainNumber.requestValue ();
+    cookies.lengthInWheels.requestValue ();
+    cookies.lengthInWagons.requestValue ();
+    cookies.mass.requestValue ();
 
 #else
     QtConcurrent::run(getParamsFromConsole);
