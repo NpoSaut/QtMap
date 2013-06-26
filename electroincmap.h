@@ -112,8 +112,8 @@ public:
 signals:
     void onPostDetected(KilometerPost post, double x);
     void onUpcomingTargets(std::vector<EMapTarget>);
-    void isLocatedChanged();
-    void ordinateChanged();
+    void isLocatedChanged(bool value);
+    void ordinateChanged(int value);
 
 public slots:
     void setMetrometer(int value);
