@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <utility>
-#include <linux/can.h>
 
 #include <QObject>
 #include <QTimer>
@@ -47,21 +46,28 @@ public:
     });
 
     static CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
+
 signals:
-    void sendNextObjectToCan(CanFrame frame);
-    
+    void targetDistanceChanged (int distance);
+    void targetNameChanged (QString name);
+    void targetTypeChanged (int type);
+
 public slots:
     void setObjectsList (const std::vector<EMapTarget> &objects);
+    void setOrdinate (int ordinate);
 
 private:
     QTimer timer;
     QMutex mutex;
     std::vector<EMapTarget> sendingObjects, receivedObjects;
-    int step;
-
+    unsigned step;
+    unsigned targetNumber;
+    unsigned targetDistance;
 
 private slots:
     void engine ();
+    void getTargetDistanceFromMcoState (CanFrame canFrame);
+    void getTargetNumberFromMcoLimits (CanFrame canFrame);
 };
 
 #endif // EMAPCANEMITTER_H

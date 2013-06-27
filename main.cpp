@@ -277,7 +277,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect (iodriver, SIGNAL(signal_passed_distance(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
-    QObject::connect (emapCanEmitter, SIGNAL(sendNextObjectToCan(CanFrame)), iodriver, SLOT(slot_send_message(CanFrame)));
 
     iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
 
@@ -296,6 +295,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
+    QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
+    QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDisstance(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
+    emapCanEmitter->setOrdinate (0xAABBCC);
 
     return app->exec();
 }
