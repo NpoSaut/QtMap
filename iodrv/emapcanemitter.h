@@ -14,6 +14,7 @@
 #include "packing.h"
 #include "emap/railobject.h"
 #include "emap/emaptarget.h"
+#include "iodrv/can.h"
 
 
 class EMapCanEmitter : public QObject
@@ -47,7 +48,7 @@ public:
 
     static CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
 signals:
-    void sendNextObjectToCan(can_frame frame);
+    void sendNextObjectToCan(CanFrame frame);
     
 public slots:
     void setObjectsList (const std::vector<EMapTarget> &objects);

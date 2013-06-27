@@ -1,6 +1,8 @@
 #if defined WITH_CAN
 
+#include "lowlevel.h"
 #include "emapcanemitter.h"
+
 #include <QDebug>
 
 using namespace std;
@@ -50,34 +52,32 @@ void EMapCanEmitter::engine()
         mutex.unlock ();
     }
 
+    CanFrame canFrame (0x8448, std::vector<unsigned char>(8)); // Должно быть 0x43E8
     if (step < sendingObjects.size ())
-//    if (step < sendingObjects.size () && step == 0)
     {
-        can_frame canFrame;
-        canFrame.can_id = 0x422; // 0x8448
-//        canFrame.can_id = 0x21F; // 0x43E8
-        canFrame.can_dlc = 8;
-
-        CanMessageData &canMessage = *((CanMessageData *) &canFrame.data);
-        canMessage = encodeEMapTarget(sendingObjects[step], step); // Это просто очень плохо
-
-//        qDebug() << "target: " << sendingObjects[step].x << " .." << canFrame.data[2] << " " << canFrame.data[3];
-
-        emit sendNextObjectToCan (canFrame);
-
-        // Вывод названия цели
-        if (step == 0)
-        {
-            canFrame.can_id = 0x603; // 0xC068
-            canFrame.can_dlc = 8;
-            memcpy (&canFrame.data, sendingObjects[step].object->getName().toAscii().data(), 8);
-
-            emit sendNextObjectToCan (canFrame);
-        }
+        CanMessageData canMessage = encodeEMapTarget(sendingObjects[step], step);
+        canFrame.setData (std::vector<unsigned char>((unsigned char *)(&canMessage), (unsigned char *)(&canMessage) + 8) );
     }
+    else
+    {
+        std::vector<unsigned char> data (8);
+        data[0] = 0;
+        data[1] = step; // Пустой объект
+        canFrame.setData (data);
+    }
+    emit sendNextObjectToCan (canFrame);
 
     if (++step == 10)
+    {
         step = 0;
+
+        // Вывод названия цели
+//        emit sendNextObjectToCan (
+//                    CanFrame (0xC068,
+//                              std::vector<unsigned char> ( sendingObjects[step].object->getName().toAscii().data(),
+//                                                           sendingObjects[step].object->getName().toAscii().data() + 8) )
+//                                 );
+    }
 }
 
 void EMapCanEmitter::setObjectsList(const vector<EMapTarget> &objects)

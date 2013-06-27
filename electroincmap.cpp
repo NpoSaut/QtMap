@@ -106,7 +106,7 @@ void ElectroincMap::setTrackNumber(int value)
 
 void ElectroincMap::checkMap(double lat, double lon)
 {
-    system ("clear");
+//    system ("clear");
     qDebug() << "...";
     printf(" lat %7.4f lon %7.4f  x: ", lat, lon); fflush(stdout);
 
