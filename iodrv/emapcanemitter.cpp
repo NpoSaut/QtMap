@@ -89,8 +89,8 @@ void EMapCanEmitter::getTargetDistanceFromMcoState(CanFrame canFrame)
 {
     if ( canFrame.getDescriptor () == 0x0A08 )
     {
-        unsigned newTargetDistance = (unsigned(canFrame.getData ()[3] & 0x1F) << 8) + canFrame.getData ()[4];
-        qDebug() << "MCO_STATE: " << newTargetDistance;
+        signed char high = unsigned(canFrame.getData ()[3] & 0x1F);
+        Complex<int16_t> newTargetDistance ({canFrame.getData ()[4], high & (1 << 4) ? high | 0xF0 : high });
         if ( newTargetDistance != targetDistance )
         {
             targetDistance = newTargetDistance;
