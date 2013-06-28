@@ -124,6 +124,7 @@ signals:
     void onUpcomingTargets(std::vector<EMapTarget>);
     void isLocatedChanged(bool value);
     void ordinateChanged(int value);
+    void activityChanged(bool active);
 
 public slots:
     void setMetrometer(int value);

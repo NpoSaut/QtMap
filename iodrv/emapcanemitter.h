@@ -45,8 +45,6 @@ public:
         unsigned int targetSpeed                :8;
     });
 
-    static CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
-
 signals:
     void targetDistanceChanged (int distance);
     void targetNameChanged (QString name);
@@ -55,14 +53,18 @@ signals:
 public slots:
     void setObjectsList (const std::vector<EMapTarget> objects);
     void setOrdinate (int ordinate);
+    void setActivity (bool active);
 
 private:
+    CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
+
     QTimer timer;
     QMutex mutex;
     std::vector<EMapTarget> sendingObjects, receivedObjects;
     unsigned step;
     unsigned targetNumber;
     unsigned targetDistance;
+    bool active;
 
 private slots:
     void engine ();

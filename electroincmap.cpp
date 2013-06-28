@@ -100,7 +100,11 @@ void ElectroincMap::setMetrometer(int value)
 void ElectroincMap::setTrackNumber(int value)
 {
     if (value != trackNumber)
+    {
         trackNumber = value;
+
+        emit activityChanged (trackNumber != 0);
+    }
 }
 
 
@@ -112,7 +116,7 @@ void ElectroincMap::checkMap(double lat, double lon)
     // Отменяем навигацию, если введён номер пути 0
     if (trackNumber == 0)
     {
-        CPRINTF(CL_GREEN, " -- карта отключена");
+        CPRINTF(CL_GREEN, " -- карта отключена\n");
         setIsLocated (false);
         return;
     }

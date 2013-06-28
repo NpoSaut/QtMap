@@ -12,7 +12,7 @@ EMapCanEmitter::EMapCanEmitter(QObject *parent) :
     QObject(parent),
     timer(parent), // Частота выдача в can объекта. Должна быть 100 мс, но из-за проблем со временем 50 -TiME-
     sendingObjects(), receivedObjects(),
-    step (0), targetNumber(0), targetDistance(0)
+    step (0), targetNumber(0), targetDistance(0), active(false)
 {
     timer.setInterval (50);
     timer.start ();
@@ -27,7 +27,7 @@ EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget
 {
     CanMessageData canMessage;
 
-    canMessage.errors = 0;
+    canMessage.errors = (active ? 0 : 1);
     canMessage.number = targetNumber;
     canMessage.type = t.object->getType ();
     canMessage.xLow = t.x & 0xFF;
@@ -59,7 +59,7 @@ void EMapCanEmitter::engine()
     else
     {
         std::vector<unsigned char> data (8);
-        data[0] = 0;
+        data[0] = (active ? 0 : 1);
         data[1] = step; // Пустой объект
         canFrame.setData (data);
     }
@@ -71,6 +71,7 @@ void EMapCanEmitter::engine()
 
 //        // Вывод названия ближайщей цели
 //        if ( targetNumber < sendingObjects.size () )
+//          if (active)
 //            canDev.transmitMessage (
 //                        CanFrame (0xC068,
 //                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
@@ -89,6 +90,7 @@ void EMapCanEmitter::getTargetDistanceFromMcoState(CanFrame canFrame)
     if ( canFrame.getDescriptor () == 0x0A08 )
     {
         unsigned newTargetDistance = (unsigned(canFrame.getData ()[3] & 0x1F) << 8) + canFrame.getData ()[4];
+        qDebug() << "MCO_STATE: " << newTargetDistance;
         if ( newTargetDistance != targetDistance )
         {
             targetDistance = newTargetDistance;
@@ -99,7 +101,7 @@ void EMapCanEmitter::getTargetDistanceFromMcoState(CanFrame canFrame)
 
 void EMapCanEmitter::getTargetNumberFromMcoLimits(CanFrame canFrame)
 {
-    if ( canFrame.getDescriptor () == 0x048 )
+    if ( canFrame.getDescriptor () == 0x0A48 )
     {
         unsigned newTargetNumber = canFrame.getData ()[6] >> 4;
         if ( newTargetNumber != targetNumber )
@@ -129,7 +131,12 @@ void EMapCanEmitter::setOrdinate(int ordinate)
     canDev.transmitMessage (
                 CanFrame (0xC0A3, // MM_COORD
                           ByteArray<3> (ordinate).msbFirst() )
-                            );
+                );
+}
+
+void EMapCanEmitter::setActivity(bool active)
+{
+    this->active = active;
 }
 
 #endif
