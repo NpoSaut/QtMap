@@ -39,6 +39,7 @@ private:
     list<KilometerPost *> getPostsInArea(double lat, double lon, double radius);
     list<KilometerPost *> getPostsInArea(list<KilometerPost *> &source, double lat, double lon, double radius);
 
+    double _prewX;
     double x;
     double l;
 

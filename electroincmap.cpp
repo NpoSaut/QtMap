@@ -90,6 +90,7 @@ double ElectroincMap::getOrdinate()
 
 void ElectroincMap::setMetrometer(int value)
 {
+    const int AllowerdeltaX = 100;
     if (value != x)
         x = value;
     checkOrdinate();
@@ -102,8 +103,12 @@ void ElectroincMap::setTrackNumber(int value)
     if (value != trackNumber)
     {
         trackNumber = value;
-
         emit activityChanged (trackNumber != 0);
+        if (trackNumber == 0)
+        {
+            setIsLocated(false);
+            firstEnter = true;
+        }
     }
 }
 
@@ -498,22 +503,6 @@ KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost, bool
 
 vector<ElectroincMap::ApproachingPoint> ElectroincMap::PostApproach::getExtremumApproaches()
 {
-//    vector<ElectroincMap::ApproachingPoint> res;
-
-//    ElectroincMap::ApproachingPoint prev_ap(1e20, 1e20);
-//    D_foreach(aPoints, ElectroincMap::ApproachingPoint, itr)
-//    {
-//        ElectroincMap::ApproachingPoint ap = *itr;
-//        if (ap.r == minimalApproach)
-//        {
-//            res.push_back(prev_ap);
-//            res.push_back(ap);
-//            res.push_back(*(++itr));
-//        }
-//        prev_ap = ap;
-//    }
-
-//    return res;
     return minPoints;
 }
 
@@ -553,7 +542,8 @@ bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoin
 
     //CPRINTF(CL_WHITE_L, " r: %5.1f ", ap.r);
     if (minCandidateActualCount == 3 &&
-            minCandidate[0].r > minCandidate[1].r &&
+            (minCandidate[1].x - minCandidate[0].x) * (minCandidate[2].x - minCandidate[1].x) > 0 &&   // Проверяем, чтобы точки шли по порядку (в смылсе x)
+            minCandidate[0].r > minCandidate[1].r &&                                                   // И чтобы они образовывали минимум
             minCandidate[2].r > minCandidate[1].r)
     {
         bool a = false;
