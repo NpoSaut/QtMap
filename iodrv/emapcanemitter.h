@@ -53,7 +53,7 @@ signals:
     void targetTypeChanged (int type);
 
 public slots:
-    void setObjectsList (const std::vector<EMapTarget> &objects);
+    void setObjectsList (const std::vector<EMapTarget> objects);
     void setOrdinate (int ordinate);
 
 private:

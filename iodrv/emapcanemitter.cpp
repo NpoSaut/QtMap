@@ -11,6 +11,7 @@ using namespace Navigation;
 EMapCanEmitter::EMapCanEmitter(QObject *parent) :
     QObject(parent),
     timer(parent), // Частота выдача в can объекта. Должна быть 100 мс, но из-за проблем со временем 50 -TiME-
+    sendingObjects(), receivedObjects(),
     step (0), targetNumber(0), targetDistance(0)
 {
     timer.setInterval (50);
@@ -68,13 +69,13 @@ void EMapCanEmitter::engine()
     {
         step = 0;
 
-        // Вывод названия ближайщей цели
-        if ( targetNumber < sendingObjects.size () )
-            canDev.transmitMessage (
-                        CanFrame (0xC068,
-                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
-                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
-                                     );
+//        // Вывод названия ближайщей цели
+//        if ( targetNumber < sendingObjects.size () )
+//            canDev.transmitMessage (
+//                        CanFrame (0xC068,
+//                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
+//                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
+//                                     );
 
         // Обновление списка целей
         mutex.lock ();
@@ -104,10 +105,10 @@ void EMapCanEmitter::getTargetNumberFromMcoLimits(CanFrame canFrame)
         if ( newTargetNumber != targetNumber )
         {
             targetNumber = newTargetNumber;
-            if ( targetNumber < receivedObjects.size () )
+            if ( targetNumber < sendingObjects.size () )
             {
-                emit targetNameChanged (receivedObjects[targetNumber].object->getName());
-                emit targetTypeChanged (receivedObjects[targetNumber].object->getType());
+                emit targetNameChanged (sendingObjects[targetNumber].object->getName());
+                emit targetTypeChanged (sendingObjects[targetNumber].object->getType());
             }
             else
             {
@@ -118,7 +119,7 @@ void EMapCanEmitter::getTargetNumberFromMcoLimits(CanFrame canFrame)
     }
 }
 
-void EMapCanEmitter::setObjectsList(const vector<EMapTarget> &objects)
+void EMapCanEmitter::setObjectsList(const vector<EMapTarget> objects)
 {
     receivedObjects = objects;
 }

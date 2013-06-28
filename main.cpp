@@ -24,6 +24,7 @@
 #include "iodrv/emapcanemitter.h"
 #endif
 
+
 SystemStateViewModel *systemState ;
 Navigation::ElectroincMap* elMap;
 
@@ -274,7 +275,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 //    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
 
     // Электронная карта
-    QObject::connect (iodriver, SIGNAL(signal_passed_distance(int)), elMap, SLOT(setMetrometer(int)));
+    QObject::connect (iodriver, SIGNAL(signal_orig_passed_distance(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
 
@@ -294,13 +295,18 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
+
+    // Для отладки
+//    elMap->setTrackNumber (1);
+//    elMap->setMetrometer (0);
+//    elMap->checkMap (55.7156, 37.6932);
+
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
-    QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDisstance(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDistance(int)));
     QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
     QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
-    emapCanEmitter->setOrdinate (0xAABBCC);
 
     return app->exec();
 }

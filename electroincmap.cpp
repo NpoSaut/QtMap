@@ -181,7 +181,7 @@ void ElectroincMap::checkMap(double lat, double lon)
         nextPosts.remove(departPost);   // Удаляем оттуда столб отправления (на него мы не можем ехать)
     syncPostApproaches(nextPosts);      // синхронизируем список приближений
 
-    // Вычисляем приближения для всех точек
+   // Вычисляем приближения для всех точек
     foreach(PostApproach *pa, postApproaches)
     {
         // Добавляем текущую точку приближения
@@ -307,7 +307,7 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
 // Получает список ближайих целей
 vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost, double startPostX, int count)
 {
-    const int backBuffer = 300;
+    const int backBuffer = 0;
     vector<EMapTarget> res;
     double currentPostX = startPostX;
     const KilometerPost *currentPost = startPost;
@@ -318,6 +318,7 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
     do
     {
         Rail *currentRail = getMyRail(currentPost);
+        if (currentRail == nullptr) break;
 //        CPRINTF(CL_GREEN_L, "    Проверяем КП %5.0f", currentPost->ordinate);
 //        printf(" X:");
 //        CPRINTF(CL_VIOLET_L, " %5.0f\n", currentPostX);
@@ -389,6 +390,8 @@ void ElectroincMap::checkObjects()
 //    CPRINTF(CL_CYAN_L, "%5.0f", currentKilometer->ordinate);
 //    CPRINTF(CL_CYAN, " departX %.0f м\n", departX);
 //    CPRINTF(CL_RED_L, "     d = %.0f м\n", departPost->ordinate - currentKilometer->ordinate);
+
+
     vector<EMapTarget> targets = getNextObjects(currentKilometer, departX + (departPost->ordinate - currentKilometer->ordinate));
     foreach (EMapTarget t, targets) {
         CPRINTF(CL_GREEN , "     TARGET");
