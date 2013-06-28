@@ -78,6 +78,7 @@ private:
         double getX();
         double minimalApproach;
         double approachingSpeed;
+        double lastApproach;
         list<ApproachingPoint> aPoints;
         int minCandidateActualCount;
         ApproachingPoint minCandidate[3];

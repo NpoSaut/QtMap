@@ -107,7 +107,6 @@ void ElectroincMap::setTrackNumber(int value)
 void ElectroincMap::checkMap(double lat, double lon)
 {
 //    system ("clear");
-    qDebug() << "...";
     printf(" lat %7.4f lon %7.4f  x: ", lat, lon); fflush(stdout);
 
     // Отменяем навигацию, если введён номер пути 0
@@ -209,6 +208,8 @@ void ElectroincMap::checkMap(double lat, double lon)
     CPRINTF(CL_GREEN_L, "%5.2f", targetPostApproach->approachingSpeed);
     printf(" (");
     CPRINTF(CL_GREEN, "%3.1f", targetPostApproach->minimalApproach);
+    printf(" \ ");
+    CPRINTF(CL_GREEN, "%3.1f", targetPostApproach->lastApproach);
     printf(")");
     printf("\n");
 
@@ -525,7 +526,7 @@ const double approachIncreaseLimit = 15; // м
 bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoint ap)
 {
     foreach (ApproachingPoint iap, aPoints) {
-        if (ap.x == iap.x) return false;
+        if (ap.x == iap.x || ap.r == iap.r) return false;
     }
 
     // Удаляем все лишние точки
@@ -533,6 +534,7 @@ bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoin
         aPoints.pop_front();
 
     aPoints.push_back(ap);
+    lastApproach = ap.r;
 
     approachingSpeed = estimateApproaching();
 
@@ -545,11 +547,16 @@ bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoin
 
     if (ap.r < minimalApproach) minimalApproach = ap.r;
 
-    CPRINTF(CL_BLUE, "   adding post with r: %5.1f\n", ap.r);
-    if (minCandidateActualCount == 3 && minCandidate[0].r >= minCandidate[1].r && minCandidate[2].r >= minCandidate[1].r)
+    //CPRINTF(CL_WHITE_L, " r: %5.1f ", ap.r);
+    if (minCandidateActualCount == 3 &&
+            minCandidate[0].r > minCandidate[1].r &&
+            minCandidate[2].r > minCandidate[1].r)
     {
-        CPRINTF(CL_GREEN, "   \nlocal minimum detected with r: %5.1f\n", minCandidate[1].r);
-        if (minCandidate[1].r < minimalApproach)
+        bool a = false;
+        if (minPoints.size() != 3) a = true;
+        else if ( minCandidate[1].r < minPoints[1].r) a = true;
+
+        if (a)
         {
             CPRINTF(CL_GREEN_L, "   global minimum detected with r: %5.1f\n", minCandidate[1].r);
             minPoints.clear ();
@@ -561,18 +568,6 @@ bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoin
 
     if (minPoints.size () == 3)
         achived = ap.r - minimalApproach >= approachIncreaseLimit;
-
-//    // Проверяем, ближе ли эта точка к столбу чем другие
-//    if (ap.r < minimalApproach)
-//    {
-//        minimalApproach = ap.r;
-//    }
-//    // Если мы не приближаемся к столбу - проверяем, не отдалились ли мы от его а "достоверное" расстояние
-//    else
-//    {
-//        achived = ap.r - minimalApproach >= approachIncreaseLimit;
-//    }
-
 
     return achived;
 }

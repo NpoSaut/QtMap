@@ -297,6 +297,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
 
+//    elMap->setTrackNumber (1);
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
