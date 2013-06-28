@@ -289,17 +289,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     cookies.mass.requestValue ();
 
 #else
-//    QtConcurrent::run(getParamsFromConsole);
+    QtConcurrent::run(getParamsFromConsole);
 #endif
 
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
-
-    // Для отладки
-//    elMap->setTrackNumber (1);
-//    elMap->setMetrometer (0);
-//    elMap->checkMap (55.7156, 37.6932);
 
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));

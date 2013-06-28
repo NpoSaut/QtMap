@@ -26,5 +26,11 @@ Rail *Rail::loadFrom(const QByteArray &rawData, int offset, int index)
 
 KilometerIncreaseDirectoin Rail::getDirectoin(int railNumber)
 {
-    return (KilometerIncreaseDirectoin)( (railNumber % 2 == 0 ? -1 : 1) * (railNumber < 16 ? 1 : -1) );
+    if (railNumber < 16)
+        return (KilometerIncreaseDirectoin) (railNumber % 2 == 0 ? -1 : 1);
+    else
+        return (KilometerIncreaseDirectoin) (railNumber % 2 == 0 ? 1 : -1);
+
+
+    //return (KilometerIncreaseDirectoin)( (railNumber % 2 == 0 ? -1 : 1) * (railNumber < 16 ? 1 : -1) );
 }

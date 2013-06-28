@@ -152,22 +152,27 @@ void ElectroincMap::checkMap(double lat, double lon)
     if (firstEnter)
     {
         // Находим ближайший километровый столб (за исключением "столба отправления")
-        KilometerPost *closestPost = nullptr;
+        KilometerPost *closestTargetPost = nullptr;
+        KilometerPost *closestDepartPost = nullptr;
         double closestDist = 1e20;
         foreach (KilometerPost *p, nearPosts)
         {
-            if (p != departPost && p->position == kpp_middle)
+            KilometerPost *dp = projectNextPost(p, true);
+            //if (p != departPost && p->position == kpp_middle)
+            if (dp != nullptr)
             {
-                double d = p->distanceTo(lat, lon);
+                double d = p->distanceTo(lat, lon) + dp->distanceTo (lat, lon);
                 if (d < closestDist)
                 {
-                    closestPost = p;
+                    closestTargetPost = p;
+                    closestDepartPost = dp;
                     closestDist = d;
                 }
             }
         }
-        targetPost = closestPost;
-        departPost = projectNextPost(targetPost, true);
+        targetPost = closestTargetPost;
+        departPost = closestDepartPost;
+        //departPost = projectNextPost(targetPost, true);
         departX = x - departPost->distanceTo(lat, lon);
         setIsLocated (true);
 
@@ -463,7 +468,7 @@ void ElectroincMap::syncPostApproaches(list<KilometerPost *> posts)
 
 KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost, bool goBack)
 {
-    int direction = forPost->direction * getMyRail(forPost)->direction * (goBack ? -1 : 1);
+    int direction = forPost->direction * Rail::getDirectoin (trackNumber) * (goBack ? -1 : 1);
     KilometerPost *res = nullptr;
     double shiftToRes = 1e20;
     foreach(KilometerPost *kp, nearPosts)
