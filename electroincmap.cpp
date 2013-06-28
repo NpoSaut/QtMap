@@ -207,6 +207,9 @@ void ElectroincMap::checkMap(double lat, double lon)
     else { CPRINTF(CL_YELLOW_L, "%5.0f", targetPost->ordinate); }
     printf(" appr: ");
     CPRINTF(CL_GREEN_L, "%5.2f", targetPostApproach->approachingSpeed);
+    printf(" (");
+    CPRINTF(CL_GREEN, "%3.1f", targetPostApproach->minimalApproach);
+    printf(")");
     printf("\n");
 
     // Смотрим, не нужно ли соскачить со столба
@@ -214,6 +217,7 @@ void ElectroincMap::checkMap(double lat, double lon)
             (targetPostApproach->approachingSpeed < 0 &&    // Соскакиваем, если мы удаляемся от столба
              targetPostApproach->minimalApproach > 150))    // И максимальное приближение было более 150 метров
     {
+        CPRINTF(CL_YELLOW, "      Loosing post\n");
         targetPostApproach = findBestApproach();
         targetPost = targetPostApproach->post;
 
@@ -221,7 +225,7 @@ void ElectroincMap::checkMap(double lat, double lon)
         if (p == nullptr) setIsLocated(false);
         else departPost = p;
 
-        CPRINTF(CL_YELLOW_L, "      CHECKED TO [%8.0f  -->  %8.0f]", departPost->ordinate, targetPost->ordinate);
+        CPRINTF(CL_YELLOW_L, "      CHECKED TO [%8.0f  -->  %8.0f]\n", departPost->ordinate, targetPost->ordinate);
     }
 
 
@@ -489,22 +493,23 @@ KilometerPost *ElectroincMap::projectNextPost(const KilometerPost *forPost, bool
 
 vector<ElectroincMap::ApproachingPoint> ElectroincMap::PostApproach::getExtremumApproaches()
 {
-    vector<ElectroincMap::ApproachingPoint> res;
+//    vector<ElectroincMap::ApproachingPoint> res;
 
-    ElectroincMap::ApproachingPoint prev_ap(1e20, 1e20);
-    D_foreach(aPoints, ElectroincMap::ApproachingPoint, itr)
-    {
-        ElectroincMap::ApproachingPoint ap = *itr;
-        if (ap.r == minimalApproach)
-        {
-            res.push_back(prev_ap);
-            res.push_back(ap);
-            res.push_back(*(++itr));
-        }
-        prev_ap = ap;
-    }
+//    ElectroincMap::ApproachingPoint prev_ap(1e20, 1e20);
+//    D_foreach(aPoints, ElectroincMap::ApproachingPoint, itr)
+//    {
+//        ElectroincMap::ApproachingPoint ap = *itr;
+//        if (ap.r == minimalApproach)
+//        {
+//            res.push_back(prev_ap);
+//            res.push_back(ap);
+//            res.push_back(*(++itr));
+//        }
+//        prev_ap = ap;
+//    }
 
-    return res;
+//    return res;
+    return minPoints;
 }
 
 double ElectroincMap::PostApproach::parabolizeX(vector<ElectroincMap::ApproachingPoint> aprs)
@@ -516,7 +521,7 @@ double ElectroincMap::PostApproach::parabolizeX(vector<ElectroincMap::Approachin
 
 
 
-const double approachIncreaseLimit = 30; // м
+const double approachIncreaseLimit = 15; // м
 bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoint ap)
 {
     foreach (ApproachingPoint iap, aPoints) {
@@ -531,16 +536,44 @@ bool ElectroincMap::PostApproach::pushApproaching(ElectroincMap::ApproachingPoin
 
     approachingSpeed = estimateApproaching();
 
-    // Проверяем, ближе ли эта точка к столбу чем другие
-    if (ap.r < minimalApproach)
+    if (minCandidateActualCount == 3)
     {
-        minimalApproach = ap.r;
+        minCandidate[0] = minCandidate[1];
+        minCandidate[1] = minCandidate[2];
+    } else minCandidateActualCount++;
+    minCandidate[minCandidateActualCount - 1] = ap;
+
+    if (ap.r < minimalApproach) minimalApproach = ap.r;
+
+    CPRINTF(CL_BLUE, "   adding post with r: %5.1f\n", ap.r);
+    if (minCandidateActualCount == 3 && minCandidate[0].r >= minCandidate[1].r && minCandidate[2].r >= minCandidate[1].r)
+    {
+        CPRINTF(CL_GREEN, "   \nlocal minimum detected with r: %5.1f\n", minCandidate[1].r);
+        if (minCandidate[1].r < minimalApproach)
+        {
+            CPRINTF(CL_GREEN_L, "   global minimum detected with r: %5.1f\n", minCandidate[1].r);
+            minPoints.clear ();
+            minPoints.push_back (minCandidate[0]);
+            minPoints.push_back (minCandidate[1]);
+            minPoints.push_back (minCandidate[2]);
+        }
     }
-    // Если мы не приближаемся к столбу - проверяем, не отдалились ли мы от его а "достоверное" расстояние
-    else
-    {
+
+    if (minPoints.size () == 3)
         achived = ap.r - minimalApproach >= approachIncreaseLimit;
-    }
+
+//    // Проверяем, ближе ли эта точка к столбу чем другие
+//    if (ap.r < minimalApproach)
+//    {
+//        minimalApproach = ap.r;
+//    }
+//    // Если мы не приближаемся к столбу - проверяем, не отдалились ли мы от его а "достоверное" расстояние
+//    else
+//    {
+//        achived = ap.r - minimalApproach >= approachIncreaseLimit;
+//    }
+
+
     return achived;
 }
 
