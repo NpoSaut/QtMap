@@ -49,6 +49,8 @@ signals:
     void targetDistanceChanged (int distance);
     void targetNameChanged (QString name);
     void targetTypeChanged (int type);
+    void metrometerChanged (int meters);
+    void metrometerReset ();
 
 public slots:
     void setObjectsList (const std::vector<EMapTarget> objects);
@@ -65,11 +67,14 @@ private:
     unsigned targetNumber;
     unsigned targetDistance;
     bool active;
+    bool ipdRestart;
 
 private slots:
     void engine ();
     void getTargetDistanceFromMcoState (CanFrame canFrame);
     void getTargetNumberFromMcoLimits (CanFrame canFrame);
+    void getMetrometerFromIpdState (CanFrame canFrame);
+    void getIpdRestartFromSautInfo (CanFrame canFrame);
 };
 
 #endif // EMAPCANEMITTER_H

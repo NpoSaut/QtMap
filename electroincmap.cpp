@@ -355,7 +355,7 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
             // Вычисляем координату X объекта
             int objectX = (int)(currentPostX + currentRail->direction * currentPost->direction * (o->getOrdinate() - currentPost->ordinate));
 //            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
-            if (objectX + o->length >= x - trainLength)       // Добавляем объект в список только если его координата X больше текущей
+            if (objectX + o->getLength() >= x - trainLength)       // Добавляем объект в список только если его координата X больше текущей
             {
 //                CPRINTF(CL_GREEN, "*");
                 EMapTarget target(o, objectX);
