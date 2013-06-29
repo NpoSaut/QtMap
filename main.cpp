@@ -1,83 +1,38 @@
+#include <iostream>
+#include <math.h>
+
 #include <QApplication>
-#include "qmlapplicationviewer.h"
-#include "systemstateviewmodel.h"
-#include "qtconcurrentrun.h"
+#include <QtConcurrentRun>
 #include <QTextStream>
 #include <QTextCodec>
+#include <QString>
+#include <QtConcurrentRun>
+#include <qmlapplicationviewer.h>
 
-#ifdef WITH_CAN
-#include "iodrv/iodrv.h"
+#include "systemstateviewmodel.h"
+#include "electroincmap.h"
+
+#include "masqarade.h"
+#ifdef WIN32
+    HANDLE winConsoleandler;
 #endif
 
-#include <iostream>
+#include "iodrv/can.h"
+#ifdef WITH_CAN
+#include "iodrv/iodrv.h"
+#include "iodrv/cookies.h"
+#include "iodrv/emapcanemitter.h"
+#endif
+
 
 SystemStateViewModel *systemState ;
+Navigation::ElectroincMap* elMap;
 
 #ifdef WITH_CAN
 iodrv* iodriver;
 SpeedAgregator* speedAgregator;
 rmp_key_handler* rmp_key_hdlr;
-#endif
-
-
-
-/*void getSpeed (double* speed)
-{
-    systemState->setSpeed( int(*speed) );
-}
-
-void getSpeedLimits (int* val)
-{
-    systemState->setSpeedRestriction(*val);
-}
-
-void getLights (int* code)
-{
-    systemState->setLight(*code-1);
-}
-
-void getAlsn (int* code)
-{
-    if (*code == 0)
-        systemState->setAlsnFreq(50);
-    else if (*code == 1)
-        systemState->setAlsnFreq(75);
-    else if (*code == 2)
-        systemState->setAlsnFreq(50);
-    else if (*code == 3)
-        systemState->setAlsnFreq(25);
-}
-
-void getMilage (int* val)
-{
-    systemState->setMilage( (*val)/1000 );
-}
-
-void getGps (double* lat, double* lon)
-{
-    systemState->setLongitude(*lon);
-    systemState->setLatitude(*lat);
-}
-
-void getDateTime (int* h, int* m, int* s)
-{
-    QString date = QString("%1:%2:%3").arg(*h).arg(*m).arg(*s);
-    systemState->setTime(date);
-}*/
-
-#ifdef WITH_CAN
-//extern void aFunction();
-//QFuture<void> future = QtConcurrent::run(aFunction);
-/*void getParamsFromCan ()
-{
-    sktcanl_init();
-    sktcanl_set_callbacks(getSpeed, getSpeedLimits, NULL, NULL, getLights, getAlsn, getMilage, NULL, NULL, getGps, getDateTime);
-
-    while (true)
-    {
-        sktcanl_read_can_msg();
-    }
-}*/
+EMapCanEmitter* emapCanEmitter;
 #endif
 
 void getParamsFromConsole ()
@@ -194,10 +149,15 @@ void getParamsFromConsole ()
     }
 }
 
-
-
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
+#ifdef WIN32
+    // Masqarade
+    winConsoleandler = GetStdHandle(STD_OUTPUT_HANDLE);
+    system("chcp 65001");
+#endif
+    CPRINTF(CL_VIOLET_L, "ДОБРЫЙ ДЕНЬ\n");
+
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -217,16 +177,23 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
+    elMap = new Navigation::ElectroincMap();
 
 #ifdef WITH_CAN
     //QtConcurrent::run(getParamsFromCan);
     //Здесь подключаюсь я.
     iodriver = new iodrv(systemState);
     speedAgregator = new SpeedAgregator();
+    emapCanEmitter = new EMapCanEmitter();
 
     // Создание и подключение «обработчиков»
     // -> Отбработчик нажатия РМП <-
     rmp_key_hdlr = new rmp_key_handler();
+
+    // Передача сообщения в новый CAN-класс
+    qRegisterMetaType<CanFrame>("CanFrame");
+    QObject::connect (iodriver, SIGNAL(signal_new_message(CanFrame)), &canDev, SLOT(receiveFromIoDrv(CanFrame)));
+    QObject::connect (&canDev, SIGNAL(transmitToIoDrv(CanFrame)), iodriver, SLOT(slot_send_message(CanFrame)));
 
     QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), rmp_key_hdlr, SLOT(rmp_key_pressed()));
     QObject::connect(iodriver, SIGNAL(signal_ssps_mode(int)), rmp_key_hdlr, SLOT(ssps_mode_received(int)));
@@ -235,12 +202,11 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect(rmp_key_hdlr, SIGNAL(target_driving_mode_changed(int)), systemState, SLOT(setDriveModeTarget(int)));
     QObject::connect(rmp_key_hdlr, SIGNAL(actual_driving_mode_changed(int)), systemState, SLOT(setDriveModeFact(int)));
     QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
+//    QObject::connect(rmp_key_hdlr, SIGNAL(rmp_key_pressed_send()), iodriver, SLOT(slot_rmp_key_down()));
     // <- Отбработчик нажатия РМП ->
 
     // Переносить ли эти события из iodrv в обработчики
     QObject::connect(iodriver, SIGNAL(signal_iron_wheels(bool)), systemState, SLOT(setIronWheels(bool)));
-
-
 
     // Для отладки
     QObject::connect(iodriver, SIGNAL(signal_speed_earth(double)), systemState, SLOT(setSpeedFromEarth(double)));
@@ -258,16 +224,20 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     //Состояние системы
     QObject::connect(iodriver, SIGNAL(signal_epv_key(bool)), systemState, SLOT(setIsEpvReady(bool)));
     QObject::connect(iodriver, SIGNAL(signal_epv_released(bool)), systemState, SLOT(setIsEpvReleased(bool)));
+    QObject::connect (iodriver, SIGNAL(signal_modules_activity(QString)), systemState, SLOT(setModulesActivityString(QString)));
     //Одометр
     QObject::connect(iodriver, SIGNAL(signal_passed_distance(int)), systemState, SLOT(setMilage(int)));
     //Светофоры
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_light(int)), systemState, SLOT(setLight(int)));
     QObject::connect(iodriver, SIGNAL(signal_trafficlight_freq(int)), systemState, SLOT(setAlsnFreqFact(int)));
 
-    //QObject::connect(iodriver, SIGNAL(signal_driving_mode(int)), systemState, SLOT(setDriveModeFact(int)));
     QObject::connect(iodriver, SIGNAL(signal_vigilance(bool)), systemState, SLOT(setIsVigilanceRequired(bool)));
     QObject::connect(iodriver, SIGNAL(signal_movement_direction(int)), systemState, SLOT(setDirection(int)));
     QObject::connect(iodriver, SIGNAL(signal_reg_tape_avl(bool)), systemState, SLOT(setIsRegistrationTapeActive(bool)));
+
+    QObject::connect(iodriver, SIGNAL(signal_autolock_type(int)), systemState, SLOT(setAutolockTypeFact(int)));
+    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged(int)), iodriver, SLOT(slot_autolock_type_target_changed(int)));
+//    QObject::connect(systemState, SIGNAL(AutolockTypeTargetChanged()), iodriver, SLOT(slot_autolock_type_target_changed()));
 
     QObject::connect(iodriver, SIGNAL(signal_pressure_tc(QString)), systemState, SLOT(setPressureTC(QString)));
     QObject::connect(iodriver, SIGNAL(signal_pressure_tm(QString)), systemState, SLOT(setPressureTM(QString)));
@@ -279,20 +249,61 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect(iodriver, SIGNAL(signal_traction(bool)), systemState, SLOT(setIsTractionOn(bool)));
 
-    //QObject::connect(systemState, SIGNAL(AlsnFreqTargetChanged()), iodriver, SLOT(slot_f_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
     QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
-    //QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonPressed()), iodriver, SLOT(slot_rmp_key_down()));
-    //QObject::connect(systemState, SIGNAL(ChangeDrivemodeButtonReleased()), iodriver, SLOT(slot_rmp_key_up()));
 
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_vk_key_up()));
-    // TODO: QObject::connect(systemState, SIGNAL(), iodriver, SLOT(slot_rmp_key_up()));
+    // Автоблокировка
+    QObject::connect(iodriver, SIGNAL(signal_autolock_type_target(int)), systemState, SLOT(setAutolockTypeTarget(int)));
 
-    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps : can);
+    // Ввод параметров
+    QObject::connect (systemState, SIGNAL(TrackNumberChanged(int)), &cookies.trackNumberInMph, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(MachinistNumberChanged(int)), &cookies.machinistNumber, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(TrainNumberChanged(int)), &cookies.trainNumber, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(AxlesCountChanged(int)), &cookies.lengthInWheels, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(WagonCountChanged(int)), &cookies.lengthInWagons, SLOT(setVaule(int)));
+    QObject::connect (systemState, SIGNAL(TrainMassChanged(int)), &cookies.mass, SLOT(setVaule(int)));
+    // Чтение параметров
+    QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), systemState, SLOT(setTrackNumber(int)));
+    QObject::connect (&cookies.machinistNumber, SIGNAL(onChange(int)), systemState, SLOT(setMachinistNumber(int)));
+    QObject::connect (&cookies.trainNumber, SIGNAL(onChange(int)), systemState, SLOT(setTrainNumber(int)));
+    QObject::connect (&cookies.lengthInWheels, SIGNAL(onChange(int)), systemState, SLOT(setAxlesCount(int)));
+    QObject::connect (&cookies.lengthInWagons, SIGNAL(onChange(int)), systemState, SLOT(setWagonCount(int)));
+    QObject::connect (&cookies.mass, SIGNAL(onChange(int)), systemState, SLOT(setTrainMass(int)));
+
+//    QObject::connect(systemState, SIGNAL(DisableRedButtonPressed()), iodriver, SLOT(slot_vk_key_down()));
+//    QObject::connect(systemState, SIGNAL(DisableRedButtonReleased()), iodriver, SLOT(slot_vk_key_up()));
+
+    // Электронная карта
+    QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
+    QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
+
+    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
+
+    cookies.trackNumberInMph.requestValue ();
+    cookies.machinistNumber.requestValue ();
+    cookies.trainNumber.requestValue ();
+    cookies.lengthInWheels.requestValue ();
+    cookies.lengthInWagons.requestValue ();
+    cookies.mass.requestValue ();
 
 #else
     QtConcurrent::run(getParamsFromConsole);
 #endif
+
+    qDebug() << "Loading map...";
+    elMap->load ("./map.gps");
+    qDebug() << "Map loaded.";
+
+//    elMap->setTrackNumber (1);
+    QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
+    QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
+    QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
+    QObject::connect (elMap, SIGNAL(isLocatedChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
+    QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDistance(int)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
+    QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
 
     return app->exec();
 }
