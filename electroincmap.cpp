@@ -25,7 +25,8 @@ ElectroincMap::ElectroincMap(QObject *parent) :
     firstEnter(true),
     x(0), ordinate(0),
     departPost(nullptr), targetPost(nullptr),
-    xReceived(false), mapLoaded(false), isLocated(false)
+    xReceived(false), mapLoaded(false), isLocated(false),
+    trainLength(0)
 { }
 
 
@@ -284,6 +285,11 @@ void ElectroincMap::checkMap(double lat, double lon)
     checkObjects();
 }
 
+void ElectroincMap::setTrainLength(int value)
+{
+    trainLength = value;
+}
+
 ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
 {
     double targetWeigth = 1e20;
@@ -328,7 +334,6 @@ ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
 // Получает список ближайих целей
 vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost, double startPostX, int count)
 {
-    const int backBuffer = 0;
     vector<EMapTarget> res;
     double currentPostX = startPostX;
     const KilometerPost *currentPost = startPost;
@@ -350,7 +355,7 @@ vector<EMapTarget> ElectroincMap::getNextObjects(const KilometerPost *startPost,
             // Вычисляем координату X объекта
             int objectX = (int)(currentPostX + currentRail->direction * currentPost->direction * (o->getOrdinate() - currentPost->ordinate));
 //            CPRINTF(CL_GREEN, " %5d [%4d]", o->getOrdinate(), objectX);
-            if (objectX >= x - backBuffer)       // Добавляем объект в список только если его координата X больше текущей
+            if (objectX + o->length >= x - trainLength)       // Добавляем объект в список только если его координата X больше текущей
             {
 //                CPRINTF(CL_GREEN, "*");
                 EMapTarget target(o, objectX);
