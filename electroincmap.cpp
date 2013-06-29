@@ -91,8 +91,10 @@ double ElectroincMap::getOrdinate()
 void ElectroincMap::setMetrometer(int value)
 {
     const int AllowerdeltaX = 100;
-    if (value != x)
-        x = value;
+
+    if (abs(value - _prewX))    x += value - _prewX;    // Если изменение x не велико, то просто добавляем это изменение к текущему x
+    else                        x += value;             // Иначе считаем, что счётчик сбросился на 0
+    _prewX = value;
     checkOrdinate();
     xReceived = true;
 //    CPRINTF(CL_BLUE_L, "x = %7.0f\n", x);
