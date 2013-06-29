@@ -23,7 +23,7 @@ using namespace std;
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
     firstEnter(true),
-    x(0), ordinate(0),
+    x(0), _prewX(0), ordinate(0),
     departPost(nullptr), targetPost(nullptr),
     xReceived(false), mapLoaded(false), isLocated(false),
     trainLength(0)
@@ -91,14 +91,16 @@ double ElectroincMap::getOrdinate()
 
 void ElectroincMap::setMetrometer(int value)
 {
-    const int AllowerdeltaX = 100;
-
-    if (abs(value - _prewX))    x += value - _prewX;    // Если изменение x не велико, то просто добавляем это изменение к текущему x
-    else                        x += value;             // Иначе считаем, что счётчик сбросился на 0
+    x += value - _prewX;
     _prewX = value;
     checkOrdinate();
     xReceived = true;
-//    CPRINTF(CL_BLUE_L, "x = %7.0f\n", x);
+        CPRINTF(CL_CYAN_L, "x = %7.0f %7.0f %7.0f\n", x, _prewX, value);
+}
+
+void ElectroincMap::resetMetrometer(int value)
+{
+    _prewX = 0;
 }
 
 void ElectroincMap::setTrackNumber(int value)
