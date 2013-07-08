@@ -298,6 +298,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qDebug() << "Map loaded.";
 
 //    elMap->setTrackNumber (1);
+
+#ifdef WITH_CAN
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
@@ -305,6 +307,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDistance(int)));
     QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
     QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
+#endif
 
     return app->exec();
 }
