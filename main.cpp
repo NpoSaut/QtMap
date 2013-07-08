@@ -49,6 +49,7 @@ void getParamsFromConsole ()
         if (cmd.at(0) == "s")
         {
             systemState->setSpeed( cmd.at(1).toInt() );
+            systemState->setSpeedIsValid(true);
             out << "Speed: " << systemState->getSpeed() << endl;
         }
         else if (cmd.at(0) == "r")
@@ -167,7 +168,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QmlApplicationViewer viewer;
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    //app->setFont(QFont("URW Gothic L"));
     viewer.setMainQmlFile(QLatin1String("qml/QtMon/main.qml"));
 #ifdef ON_DEVICE
     viewer.showFullScreen();
@@ -295,15 +295,19 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qDebug() << "Map loaded.";
 
 //    elMap->setTrackNumber (1);
+
+#ifdef WITH_CAN
     QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), systemState, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(isLocatedChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
+    QObject::connect (elMap, SIGNAL(activityChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(targetDistanceChanged(int)), systemState, SLOT(setNextTargetDistance(int)));
     QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
     QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
+#endif
 
     return app->exec();
 }
