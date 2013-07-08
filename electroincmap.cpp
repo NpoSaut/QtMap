@@ -192,6 +192,13 @@ void ElectroincMap::checkMap(double lat, double lon)
         firstEnter = false;
     }
 
+    if (getMyRail(departPost) == nullptr)
+    {
+        CPRINTF(CL_RED, " -- введён несуществующий путь\n");
+        setIsLocated (false);
+        return;
+    } else setIsLocated(true);
+
     // Находим ближайшие столбы
     list<KilometerPost *> nextPosts = getPostsInArea(nearPosts, lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы,
                                                                                      // только к ним мы можем ехать сейчас
