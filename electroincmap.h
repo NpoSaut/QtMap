@@ -132,7 +132,7 @@ signals:
 public slots:
     // Устанавливает текущее значение проиденного пути
     void setMetrometer(int value);
-    void resetMetrometer(int value);
+    void resetMetrometer();
 
     // Устанавливает текущий номер пути
     void setTrackNumber(int value);

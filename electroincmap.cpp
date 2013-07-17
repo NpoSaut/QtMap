@@ -98,7 +98,7 @@ void ElectroincMap::setMetrometer(int value)
         CPRINTF(CL_CYAN_L, "x = %7.0f %7.0f %7.0f\n", x, _prewX, value);
 }
 
-void ElectroincMap::resetMetrometer(int value)
+void ElectroincMap::resetMetrometer()
 {
     _prewX = 0;
 }
