@@ -11,6 +11,7 @@
 
 #include "systemstateviewmodel.h"
 #include "electroincmap.h"
+#include "levithan.h"
 
 #include "masqarade.h"
 #ifdef WIN32
@@ -27,6 +28,7 @@
 
 SystemStateViewModel *systemState ;
 Navigation::ElectroincMap* elMap;
+Levithan* levithan;
 
 #ifdef WITH_CAN
 iodrv* iodriver;
@@ -178,6 +180,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject *object = viewer.rootObject();
     systemState = object->findChild<SystemStateViewModel*>("stateView");
     elMap = new Navigation::ElectroincMap();
+    levithan = new Levithan();
 
 #ifdef WITH_CAN
     //QtConcurrent::run(getParamsFromCan);
@@ -308,6 +311,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect (emapCanEmitter, SIGNAL(targetNameChanged(QString)), systemState, SLOT(setNextTargetName(QString)));
     QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
 #endif
+
+    QObject::connect (systemState, SIGNAL(LightChanged(int)), levithan, SLOT(SayHello(int)));
 
     return app->exec();
 }
