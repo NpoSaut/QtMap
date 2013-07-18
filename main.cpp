@@ -312,7 +312,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QObject::connect (emapCanEmitter, SIGNAL(targetTypeChanged(int)), systemState, SLOT(setNextTargetKind(int)));
 #endif
 
-    QObject::connect (systemState, SIGNAL(LightChanged(int)), levithan, SLOT(SayHello(int)));
+    QObject::connect (systemState, SIGNAL(LightChanged(int)), levithan, SLOT(SayLightIndex(int)));
 
     return app->exec();
 }
