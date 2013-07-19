@@ -39,6 +39,8 @@ EMapCanEmitter* emapCanEmitter;
 
 void getParamsFromConsole ()
 {
+    qDebug() << "Starting reading console...";
+
     QString str;
     QTextStream in(stdin);
     QTextStream out(stdout);
@@ -290,8 +292,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     cookies.mass.requestValue ();
 
 #else
-    QtConcurrent::run(getParamsFromConsole);
 #endif
+    auto future = QtConcurrent::run(getParamsFromConsole);
+    qDebug() << "future: " << future.isStarted() << future.isRunning() << future.isFinished();
 
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
