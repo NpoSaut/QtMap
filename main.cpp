@@ -293,8 +293,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 #else
 #endif
-    auto future = QtConcurrent::run(getParamsFromConsole);
-    qDebug() << "future: " << future.isStarted() << future.isRunning() << future.isFinished();
+    QtConcurrent::run(getParamsFromConsole);
 
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
