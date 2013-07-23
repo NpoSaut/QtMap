@@ -316,7 +316,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QObject::connect (systemState, SIGNAL(LightChanged(int)), levithan, SLOT(SayLightIndex(int)));
 
-    QObject::connect (systemState, SIGNAL(IsTractionOnChanged(bool)), levithan, SLOT(Beep(bool)));
+    QObject::connect (systemState, SIGNAL(SpeedWarningFlash()), levithan, SLOT(BeepHigh()));
+
+    QObject::connect (systemState, SIGNAL(ButtonPressed()), levithan, SLOT(BeepHigh()));
+    QObject::connect (systemState, SIGNAL(ConfirmButtonPressed()), levithan, SLOT(Beep()));
 
 
     return app->exec();
