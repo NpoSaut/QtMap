@@ -98,7 +98,7 @@ void ElectroincMap::setMetrometer(int value)
         CPRINTF(CL_CYAN_L, "x = %7.0f %7.0f %7.0f\n", x, _prewX, value);
 }
 
-void ElectroincMap::resetMetrometer(int value)
+void ElectroincMap::resetMetrometer()
 {
     _prewX = 0;
 }
@@ -191,6 +191,13 @@ void ElectroincMap::checkMap(double lat, double lon)
 
         firstEnter = false;
     }
+
+    if (getMyRail(departPost) == nullptr)
+    {
+        CPRINTF(CL_RED, " -- введён несуществующий путь\n");
+        setIsLocated (false);
+        return;
+    } else setIsLocated(true);
 
     // Находим ближайшие столбы
     list<KilometerPost *> nextPosts = getPostsInArea(nearPosts, lat, lon, 2000);     // Находим столбы на расстоянии 3х километров - казалось бы,
