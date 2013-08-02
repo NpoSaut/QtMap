@@ -10,19 +10,19 @@ using namespace Navigation;
 
 EMapCanEmitter::EMapCanEmitter(QObject *parent) :
     QObject(parent),
-    timer(parent), // Частота выдача в can объекта. Должна быть 100 мс, но из-за проблем со временем 50 -TiME-
+    timer(parent),
     sendingObjects(), receivedObjects(),
     step (0), targetNumber(0), targetDistance(0), active(false), ipdRestart(false)
 {
-    timer.setInterval (50);
+    timer.setInterval (50); // Частота выдача в can объекта. Должна быть 100 мс, но из-за проблем со временем 50 -TiME-
     timer.start ();
     QObject::connect (&timer, SIGNAL(timeout()), this, SLOT(engine()));
 
     // Получение данных о текущей цели из ЦО
-    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getTargetDistanceFromMcoState(CanFrame)));
-    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getTargetNumberFromMcoLimits(CanFrame)));
-    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getMetrometerFromIpdState(CanFrame)));
-    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getIpdRestartFromSautInfo(CanFrame)));
+    QObject::connect (&can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getTargetDistanceFromMcoState(CanFrame)));
+    QObject::connect (&can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getTargetNumberFromMcoLimits(CanFrame)));
+    QObject::connect (&can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getMetrometerFromIpdState(CanFrame)));
+    QObject::connect (&can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getIpdRestartFromSautInfo(CanFrame)));
 }
 
 EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget& t, int targetNumber)
@@ -52,7 +52,7 @@ EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget
 
 void EMapCanEmitter::engine()
 {
-    CanFrame canFrame (0x43E8, std::vector<unsigned char>(8)); // MM_STATE
+    CanFrame canFrame (0x43E8, std::vector<unsigned char>(8)); // MM_STATE id: 21F
     if (step < sendingObjects.size ())
     {
         CanMessageData canMessage = encodeEMapTarget(sendingObjects[step], step);
@@ -65,7 +65,7 @@ void EMapCanEmitter::engine()
         data[1] = step; // Пустой объект
         canFrame.setData (data);
     }
-    can.transmitMessage (canFrame);
+    can.transmitMessage (canFrame); // ^(o,0)^
 
     if (++step == 10)
     {
