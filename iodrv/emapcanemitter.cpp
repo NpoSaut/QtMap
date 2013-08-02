@@ -19,10 +19,10 @@ EMapCanEmitter::EMapCanEmitter(QObject *parent) :
     QObject::connect (&timer, SIGNAL(timeout()), this, SLOT(engine()));
 
     // Получение данных о текущей цели из ЦО
-    QObject::connect (&canDev, SIGNAL(receiveNewMessage(CanFrame)), this, SLOT(getTargetDistanceFromMcoState(CanFrame)));
-    QObject::connect (&canDev, SIGNAL(receiveNewMessage(CanFrame)), this, SLOT(getTargetNumberFromMcoLimits(CanFrame)));
-    QObject::connect (&canDev, SIGNAL(receiveNewMessage(CanFrame)), this, SLOT(getMetrometerFromIpdState(CanFrame)));
-    QObject::connect (&canDev, SIGNAL(receiveNewMessage(CanFrame)), this, SLOT(getIpdRestartFromSautInfo(CanFrame)));
+    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getTargetDistanceFromMcoState(CanFrame)));
+    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getTargetNumberFromMcoLimits(CanFrame)));
+    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getMetrometerFromIpdState(CanFrame)));
+    QObject::connect (&can, SIGNAL(newMessageReceived(CanFrame)), this, SLOT(getIpdRestartFromSautInfo(CanFrame)));
 }
 
 EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget& t, int targetNumber)
@@ -65,7 +65,7 @@ void EMapCanEmitter::engine()
         data[1] = step; // Пустой объект
         canFrame.setData (data);
     }
-    canDev.transmitMessage (canFrame);
+    can.transmitMessage (canFrame);
 
     if (++step == 10)
     {
@@ -74,7 +74,7 @@ void EMapCanEmitter::engine()
 //        // Вывод названия ближайщей цели
 //        if ( targetNumber < sendingObjects.size () )
 //          if (active)
-//            canDev.transmitMessage (
+//            can.transmitMessage (
 //                        CanFrame (0xC068,
 //                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
 //                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
@@ -154,7 +154,7 @@ void EMapCanEmitter::setObjectsList(const vector<EMapTarget> objects)
 
 void EMapCanEmitter::setOrdinate(int ordinate)
 {
-    canDev.transmitMessage (
+    can.transmitMessage (
                 CanFrame (0xC0A3, // MM_COORD
                           ByteArray<3> (ordinate).msbFirst() )
                 );
