@@ -291,7 +291,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
 #else
 #endif
-    QtConcurrent::run(getParamsFromConsole);
+//    QtConcurrent::run(getParamsFromConsole);
 
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
