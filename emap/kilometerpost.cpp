@@ -63,8 +63,8 @@ KilometerPost *KilometerPost::loadFrom(const QByteArray& data, int offset, int i
     KilometerPost *kp = new KilometerPost();
     kp->id = index;
     kp->ordinate = gpost.ordinate;
-    kp->lat = gpost.latitudeCode  * 10e-9 * 180 / MATH_PI;
-    kp->lon = gpost.longitudeCode * 10e-9 * 180 / MATH_PI;
+    kp->lat = gpost.latitudeCode  * 1e-8 * 180 / MATH_PI;
+    kp->lon = gpost.longitudeCode * 1e-8 * 180 / MATH_PI;
     *((int *) &kp->position) = gpost.position;
     kp->direction = gpost.ordinateDirection == 0 ? kid_increase : kid_decrease;
     kp->position = (KilometerPostPosition) gpost.position;
