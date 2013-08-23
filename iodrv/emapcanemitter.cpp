@@ -14,7 +14,7 @@ EMapCanEmitter::EMapCanEmitter(QObject *parent) :
     sendingObjects(), receivedObjects(),
     step (0), targetNumber(0), targetDistance(0), active(false), ipdRestart(false)
 {
-    timer.setInterval (50); // Частота выдача в can объекта. Должна быть 100 мс, но из-за проблем со временем 50 -TiME-
+    timer.setInterval (100); // Частота выдача в can объекта.
     timer.start ();
     QObject::connect (&timer, SIGNAL(timeout()), this, SLOT(engine()));
 
