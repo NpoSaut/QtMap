@@ -10,7 +10,7 @@
 #include <QTimer>
 #include <QMutex>
 
-#include "packing.h"
+#include "cDoodahLib/packing.h"
 #include "emap/railobject.h"
 #include "emap/emaptarget.h"
 #include "iodrv/can.h"

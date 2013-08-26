@@ -13,7 +13,7 @@
 #include "electroincmap.h"
 #include "levithan.h"
 
-#include "masqarade.h"
+#include "cDoodahLib/masqarade.h"
 #ifdef WIN32
     HANDLE winConsoleandler;
 #endif

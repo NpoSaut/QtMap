@@ -5,7 +5,7 @@
 #include <QString>
 
 #include "almanac.h"
-#include "packing.h"
+#include "cDoodahLib/packing.h"
 
 namespace Navigation
 {

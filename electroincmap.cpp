@@ -4,11 +4,11 @@
 #include <QFile>
 #include <QTextCodec>
 
-#include "masqarade.h"
+#include "cDoodahLib/masqarade.h"
 
 #include "electroincmap.h"
 
-#include "masqarade.h"
+#include "cDoodahLib/masqarade.h"
 
 #include "iodrv/emapcanemitter.h"
 

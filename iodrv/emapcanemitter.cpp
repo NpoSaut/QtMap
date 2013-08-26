@@ -1,6 +1,6 @@
 #if defined WITH_CAN
 
-#include "lowlevel.h"
+#include "cDoodahLib/lowlevel.h"
 #include "emapcanemitter.h"
 
 #include <QDebug>
