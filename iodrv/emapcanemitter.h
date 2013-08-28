@@ -13,7 +13,7 @@
 #include "cDoodahLib/packing.h"
 #include "emap/railobject.h"
 #include "emap/emaptarget.h"
-#include "iodrv/can.h"
+#include "qtCanLib/can.h"
 
 
 class EMapCanEmitter : public QObject

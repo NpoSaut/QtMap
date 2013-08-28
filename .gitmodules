@@ -4,3 +4,6 @@
 [submodule "qtDoodahLib"]
 	path = qtDoodahLib
 	url = https://github.com/NpoSaut/qtDoodahLib.git
+[submodule "qtCanLib"]
+	path = qtCanLib
+	url = https://github.com/NpoSaut/qtCanLib.git

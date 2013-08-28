@@ -18,7 +18,7 @@
     HANDLE winConsoleandler;
 #endif
 
-#include "iodrv/can.h"
+#include "qtCanLib/can.h"
 #ifdef WITH_CAN
 #include "iodrv/iodrv.h"
 #include "iodrv/cookies.h"
