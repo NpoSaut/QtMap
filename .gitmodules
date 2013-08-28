@@ -1,0 +1,3 @@
+[submodule "cDoodahLib"]
+	path = cDoodahLib
+	url = https://github.com/NpoSaut/cDoodahLib.git
