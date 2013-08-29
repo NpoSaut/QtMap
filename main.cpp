@@ -20,8 +20,8 @@
 
 #include "qtCanLib/can.h"
 #ifdef WITH_CAN
-#include "iodrv/iodrv.h"
-#include "iodrv/cookies.h"
+#include "qtBlokLib/iodrv.h"
+#include "qtBlokLib/cookies.h"
 #include "iodrv/emapcanemitter.h"
 #endif
 

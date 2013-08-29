@@ -7,3 +7,6 @@
 [submodule "qtCanLib"]
 	path = qtCanLib
 	url = https://github.com/NpoSaut/qtCanLib.git
+[submodule "qtBlokLib"]
+	path = qtBlokLib
+	url = https://github.com/NpoSaut/qtBlokLib.git
