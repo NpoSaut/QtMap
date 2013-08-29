@@ -71,14 +71,14 @@ void EMapCanEmitter::engine()
     {
         step = 0;
 
-//        // Вывод названия ближайщей цели
-//        if ( targetNumber < sendingObjects.size () )
-//          if (active)
-//            can.transmitMessage (
-//                        CanFrame (0xC068,
-//                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
-//                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
-//                                     );
+        // Вывод названия ближайщей цели
+        if ( targetNumber < sendingObjects.size () )
+          if (active)
+            can.transmitMessage (
+                        CanFrame (0xC068,
+                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
+                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
+                                     );
 
         // Обновление списка целей
         mutex.lock ();
