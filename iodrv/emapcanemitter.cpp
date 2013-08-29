@@ -1,5 +1,7 @@
 #if defined WITH_CAN
 
+#include <QTextCodec>
+
 #include "cDoodahLib/lowlevel.h"
 #include "emapcanemitter.h"
 
@@ -74,11 +76,18 @@ void EMapCanEmitter::engine()
         // Вывод названия ближайщей цели
         if ( targetNumber < sendingObjects.size () )
           if (active)
-            can.transmitMessage (
-                        CanFrame (0xC068,
-                                  std::vector<unsigned char> ( sendingObjects[targetNumber].object->getName().toAscii().data(),
-                                                               sendingObjects[targetNumber].object->getName().toAscii().data() + 8) )
-                                     );
+          {
+              QTextCodec *codec = QTextCodec::codecForName("CP1251");
+
+              char *name = codec->fromUnicode (
+                          sendingObjects[targetNumber].object->getName().leftJustified(8, ' ')
+                                                ).data ();
+
+              can.transmitMessage (
+                          CanFrame (0xC068,
+                                    std::vector<unsigned char> {name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7]} )
+                          );
+          }
 
         // Обновление списка целей
         mutex.lock ();
