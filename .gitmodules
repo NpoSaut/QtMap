@@ -1,0 +1,12 @@
+[submodule "cDoodahLib"]
+	path = cDoodahLib
+	url = https://github.com/NpoSaut/cDoodahLib.git
+[submodule "qtDoodahLib"]
+	path = qtDoodahLib
+	url = https://github.com/NpoSaut/qtDoodahLib.git
+[submodule "qtCanLib"]
+	path = qtCanLib
+	url = https://github.com/NpoSaut/qtCanLib.git
+[submodule "qtBlokLib"]
+	path = qtBlokLib
+	url = https://github.com/NpoSaut/qtBlokLib.git
