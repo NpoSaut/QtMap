@@ -84,9 +84,7 @@ void EMapCanEmitter::engine()
                                                 ).data ();
 
               can.transmitMessage (
-                          CanFrame (0xC068,
-                                    std::vector<unsigned char> {name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7]} )
-                          );
+                          CanFrame(0xC068, std::vector<unsigned char> (name, name + 8)) );
           }
 
         // Обновление списка целей
