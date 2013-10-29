@@ -104,10 +104,11 @@ private:
 
     KilometerPost *getCurrentKilometer();
 
-    int myDirection() { return getDirection (trackNumber, getCurrentKilometer()); }
+    int customDirection = 0;
+    int myDirection() { return trackNumber != 0 ? getDirection (trackNumber, getCurrentKilometer()) : customDirection ; }
     static int getDirection(int trackNumber, KilometerPost *kilometer);
 
-    void checkOrdinate();
+    void checkOrdinate(int delta);
 
     int closestObjectX;
     void checkObjects();
@@ -142,6 +143,11 @@ public slots:
 
     // Задаёт длину состава (в метрах)
     void setTrainLength(int value);
+
+    // Задаёт начальную ординату в кастомном режиме
+    void setOrdinate(int value);
+    // Задаёт направление в кастомном режиме
+    void setCustomDirection(int value);
 };
 
 }

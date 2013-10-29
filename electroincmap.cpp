@@ -91,9 +91,10 @@ double ElectroincMap::getOrdinate()
 
 void ElectroincMap::setMetrometer(int value)
 {
-    x += value - _prewX;
+    int delta = value - _prewX;
+    x += delta;
     _prewX = value;
-    checkOrdinate();
+    checkOrdinate(delta);
     xReceived = true;
         CPRINTF(CL_CYAN_L, "x = %7.0f %7.0f %7.0f\n", x, _prewX, value);
 }
@@ -299,6 +300,16 @@ void ElectroincMap::setTrainLength(int value)
     trainLength = value;
 }
 
+void ElectroincMap::setOrdinate(int value)
+{
+    ordinate = value;
+}
+
+void ElectroincMap::setCustomDirection(int value)
+{
+    customDirection = value;
+}
+
 ElectroincMap::PostApproach *ElectroincMap::findBestApproach()
 {
     double targetWeigth = 1e20;
@@ -401,13 +412,18 @@ int ElectroincMap::getDirection(int trackNumber, KilometerPost *kilometer)
     return kilometer->direction * Rail::getDirectoin (trackNumber);
 }
 
-void ElectroincMap::checkOrdinate()
+void ElectroincMap::checkOrdinate(int delta)
 {
+    int _oldOrdinate = ordinate;
+    if (trackNumber == 0)
+    {
+        ordinate += myDirection() * delta;
+    }
     if (departPost != nullptr)
     {
         ordinate = departPost->ordinate + myDirection() * (x - departX);
-        emit ordinateChanged((int)ordinate);
     }
+    if (ordinate != _oldOrdinate) emit ordinateChanged((int)ordinate);
 }
 
 void ElectroincMap::checkObjects()
