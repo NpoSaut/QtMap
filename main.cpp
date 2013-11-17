@@ -9,10 +9,13 @@
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
 #include "qtBlokLib/cookies.h"
+#include "qtCanLib/socketcan.h"
 
+Can *can;
 Navigation::ElectroincMap* elMap;
 iodrv* iodriver;
 EMapCanEmitter* emapCanEmitter;
+Cookies *cookies;
 
 int main(int argc, char *argv[])
 {
@@ -24,21 +27,23 @@ int main(int argc, char *argv[])
     system("chcp 65001");
 #endif
 
+    can = new SocketCan();
     elMap = new Navigation::ElectroincMap();
-    iodriver = new iodrv();
-    emapCanEmitter = new EMapCanEmitter();
+    iodriver = new iodrv(can);
+    emapCanEmitter = new EMapCanEmitter(can);
+    cookies = new Cookies(can);
 
 
-    iodriver->start(argv[1], argv[2], (QString(argv[3]).toInt() == 0) ? gps_data_source_gps : gps_data_source_can);
+    iodriver->start(gps_data_source_gps);
 
-    cookies.trackNumberInMph.requestValue ();
+    cookies->trackNumberInMph.requestValue ();
 
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
 
     QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
-    QObject::connect (&cookies.trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
+    QObject::connect (&cookies->trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer()));
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));

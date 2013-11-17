@@ -20,7 +20,7 @@ class EMapCanEmitter : public QObject
 {
     Q_OBJECT
 public:
-    explicit EMapCanEmitter(QObject *parent = 0);
+    explicit EMapCanEmitter(Can *can, QObject *parent = 0);
     
     PACKED(
     struct CanMessageData
@@ -60,6 +60,7 @@ public slots:
 private:
     CanMessageData encodeEMapTarget(const EMapTarget &t, int targetNumber = 0);
 
+    Can *can;
     QTimer timer;
     QMutex mutex;
     std::vector<EMapTarget> sendingObjects, receivedObjects;
