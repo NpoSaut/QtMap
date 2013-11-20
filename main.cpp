@@ -6,6 +6,8 @@
 #endif
 
 #include "electroincmap.h"
+#include "customordinatehandler.h"
+
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
 #include "qtBlokLib/cookies.h"
@@ -16,6 +18,7 @@ Navigation::ElectroincMap* elMap;
 iodrv* iodriver;
 EMapCanEmitter* emapCanEmitter;
 Cookies *cookies;
+CustomOrdinateHandler *customOrdinateHandler;
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +35,7 @@ int main(int argc, char *argv[])
     iodriver = new iodrv(can);
     emapCanEmitter = new EMapCanEmitter(can);
     cookies = new Cookies(can);
-
+    customOrdinateHandler = new CustomOrdinateHandler (cookies);
 
     iodriver->start(gps_data_source_gps);
 
@@ -46,10 +49,13 @@ int main(int argc, char *argv[])
     QObject::connect (&cookies->trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer()));
+    QObject::connect (customOrdinateHandler, SIGNAL(ordinateChanged(int)), elMap, SLOT(setCustomOrdinate(int)));
+    QObject::connect (customOrdinateHandler, SIGNAL(directionChanged(int)), elMap, SLOT(setCustomDirection(int)));
     QObject::connect (elMap, SIGNAL(onUpcomingTargets(std::vector<EMapTarget>)), emapCanEmitter, SLOT(setObjectsList(std::vector<EMapTarget>)));
     QObject::connect (elMap, SIGNAL(ordinateChanged(int)), emapCanEmitter, SLOT(setOrdinate(int)));
     QObject::connect (elMap, SIGNAL(isLocatedChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
     QObject::connect (elMap, SIGNAL(activityChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
+    QObject::connect (elMap, SIGNAL(ordinateChanged(int)), customOrdinateHandler, SLOT(setCurrentOrdinate(int)));
     
     return a.exec();
 }

@@ -33,7 +33,8 @@ SOURCES += \
     qtBlokLib/iodrv.cpp \
     qtBlokLib/endecs.cpp \
     qtBlokLib/cookies.cpp \
-    electroincmap.cpp
+    electroincmap.cpp \
+    customordinatehandler.cpp
 
 HEADERS += \
     emap/routesection.h \
@@ -57,7 +58,8 @@ HEADERS += \
     qtCanLib/canframe.h \
     qtCanLib/can.h \
     qtDoodahLib/queues.h \
-    electroincmap.h
+    electroincmap.h \
+    customordinatehandler.h
 
 CONFIG += console
 

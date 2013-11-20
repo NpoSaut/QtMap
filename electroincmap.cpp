@@ -300,7 +300,7 @@ void ElectroincMap::setTrainLength(int value)
     trainLength = value;
 }
 
-void ElectroincMap::setOrdinate(int value)
+void ElectroincMap::setCustomOrdinate(int value)
 {
     ordinate = value;
 }

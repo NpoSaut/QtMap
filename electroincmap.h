@@ -145,7 +145,7 @@ public slots:
     void setTrainLength(int value);
 
     // Задаёт начальную ординату в кастомном режиме
-    void setOrdinate(int value);
+    void setCustomOrdinate(int value);
     // Задаёт направление в кастомном режиме
     void setCustomDirection(int value);
 };
