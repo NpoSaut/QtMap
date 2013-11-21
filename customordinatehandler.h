@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "qtCanLib/can.h"
 #include "qtBlokLib/cookies.h"
 
 // Обеспечивает сохранение и загрузку кастомных ординаты и направления в МПХ
@@ -10,7 +11,7 @@ class CustomOrdinateHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit CustomOrdinateHandler(Cookies *cookies, QObject *parent = 0);
+    explicit CustomOrdinateHandler(Can *can, Cookies *cookies, QObject *parent = 0);
     
 signals:
     // Испускается при изменении кастомной ординаты из вне
@@ -31,8 +32,12 @@ protected slots:
     // Преобразует формат напрвления движения
     //  и испускает directionChanged()
     void processCookieDirection (int dir); // 1 - вперёд, 0 - назад
+    // При отсутсвии записи в МПХ
+    //  отрабатывать хотя бы по попытке записи
+    void processCanWriteCookieMessage (CanFrame frame);
 
 protected:
+    Can *can;
     Cookies *cookies;
 
     int ordinateToStore;

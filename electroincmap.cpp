@@ -423,7 +423,7 @@ void ElectroincMap::checkOrdinate(int delta)
     {
         ordinate = departPost->ordinate + myDirection() * (x - departX);
     }
-    if (ordinate != _oldOrdinate) emit ordinateChanged((int)ordinate);
+    emit ordinateChanged((int)ordinate);
 }
 
 void ElectroincMap::checkObjects()
