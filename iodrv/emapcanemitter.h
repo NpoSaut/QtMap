@@ -54,7 +54,7 @@ signals:
 
 public slots:
     void setObjectsList (const std::vector<EMapTarget> objects);
-    void setOrdinate (int ordinate);
+    void sendOrdinate (int ordinate);
     void setActivity (bool active);
 
 private:

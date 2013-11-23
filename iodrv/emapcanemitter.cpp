@@ -160,7 +160,7 @@ void EMapCanEmitter::setObjectsList(const vector<EMapTarget> objects)
     receivedObjects = objects;
 }
 
-void EMapCanEmitter::setOrdinate(int ordinate)
+void EMapCanEmitter::sendOrdinate(int ordinate)
 {
     can->transmitMessage (
                 CanFrame (0xC0A3, // MM_COORD
