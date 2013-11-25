@@ -1,5 +1,3 @@
-#if defined WITH_CAN
-
 #ifndef EMAPCANEMITTER_H
 #define EMAPCANEMITTER_H
 
@@ -79,5 +77,3 @@ private slots:
 };
 
 #endif // EMAPCANEMITTER_H
-
-#endif

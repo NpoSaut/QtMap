@@ -1,5 +1,3 @@
-#if defined WITH_CAN
-
 #include <QTextCodec>
 
 #include "cDoodahLib/lowlevel.h"
@@ -172,5 +170,3 @@ void EMapCanEmitter::setActivity(bool active)
 {
     this->active = active;
 }
-
-#endif

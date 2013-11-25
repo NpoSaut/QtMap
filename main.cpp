@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 
 #include "cDoodahLib/masqarade.h"
-#ifdef WIN32
+#ifdef _WIN32
     HANDLE winConsoleandler;
 #endif
 
@@ -11,7 +11,12 @@
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
 #include "qtBlokLib/cookies.h"
+
+#ifdef WITH_CAN
 #include "qtCanLib/socketcan.h"
+#else
+#include "qtCanLib/dummycan.h"
+#endif
 
 Can *can;
 Navigation::ElectroincMap* elMap;
@@ -24,13 +29,17 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-#ifdef WIN32
+#ifdef _WIN32
     // Masqarade
     winConsoleandler = GetStdHandle(STD_OUTPUT_HANDLE);
     system("chcp 65001");
 #endif
 
+#ifdef WITH_CAN
     can = new SocketCan();
+#else
+    can = new DummyCan();
+#endif
     elMap = new Navigation::ElectroincMap();
     iodriver = new iodrv(can);
     emapCanEmitter = new EMapCanEmitter(can);

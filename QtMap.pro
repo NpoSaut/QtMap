@@ -55,6 +55,8 @@ HEADERS += \
     qtBlokLib/cookies.h \
     qtCanLib/socketcan/sktcan.h \
     qtCanLib/socketcan/cansendqueue.h \
+    qtCanLib/socketcan.h \
+    qtCanLib/dummycan.h \
     qtCanLib/canframe.h \
     qtCanLib/can.h \
     qtDoodahLib/queues.h \
