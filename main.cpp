@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     QObject::connect (elMap, SIGNAL(ordinateUpdated(int)), emapCanEmitter, SLOT(sendOrdinate(int)));
     QObject::connect (elMap, SIGNAL(isLocatedChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
 //    QObject::connect (elMap, SIGNAL(activityChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
-    QObject::connect (elMap, SIGNAL(ordinateUpdated(int)), customOrdinateHandler, SLOT(setCurrentOrdinate(int)));
+//    QObject::connect (elMap, SIGNAL(ordinateUpdated(int)), customOrdinateHandler, SLOT(setCurrentOrdinate(int)));
     
     return a.exec();
 }
