@@ -91,6 +91,7 @@ double ElectroincMap::getOrdinate()
 
 void ElectroincMap::setMetrometer(int value)
 {
+    qDebug() << "metrometer: " << value;
     int delta = value - _prewX;
     x += delta;
     _prewX = value;
