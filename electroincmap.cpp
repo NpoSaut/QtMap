@@ -420,7 +420,7 @@ void ElectroincMap::checkOrdinate(int delta)
     {
         ordinate += myDirection() * delta;
     }
-    if (departPost != nullptr)
+    else if (departPost != nullptr)
     {
         ordinate = departPost->ordinate + myDirection() * (x - departX);
     }
