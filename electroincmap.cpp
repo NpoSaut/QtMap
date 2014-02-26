@@ -23,11 +23,11 @@ using namespace std;
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
     firstEnter(true),
-    x(0), _prewX(0), ordinate(0),
+    x(0), _prewX(0), ordinate(1100),
     departPost(nullptr), targetPost(nullptr),
     xReceived(false), mapLoaded(false), isLocated(false),
     trainLength(0)
-{ }
+{}
 
 
 
@@ -122,8 +122,12 @@ void ElectroincMap::setTrackNumber(int value)
 
 void ElectroincMap::checkMap(double lat, double lon)
 {
+    // Полностью отключаем карту для Щербинки
+    return;
+
 //    system ("clear");
     printf(" lat %7.4f lon %7.4f  x: ", lat, lon); fflush(stdout);
+    setIsLocated (false);
 
     // Отменяем навигацию, если введён номер пути 0
     if (trackNumber == 0)
@@ -416,14 +420,7 @@ int ElectroincMap::getDirection(int trackNumber, KilometerPost *kilometer)
 void ElectroincMap::checkOrdinate(int delta)
 {
     int _oldOrdinate = ordinate;
-    if (trackNumber == 0)
-    {
-        ordinate += myDirection() * delta;
-    }
-    else if (departPost != nullptr)
-    {
-        ordinate = departPost->ordinate + myDirection() * (x - departX);
-    }
+    ordinate += customDirection * delta;
     emit ordinateUpdated((int)ordinate);
 }
 

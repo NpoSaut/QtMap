@@ -104,7 +104,7 @@ private:
 
     KilometerPost *getCurrentKilometer();
 
-    int customDirection = 0;
+    int customDirection = +1;
     int myDirection() { return trackNumber != 0 ? getDirection (trackNumber, getCurrentKilometer()) : customDirection ; }
     static int getDirection(int trackNumber, KilometerPost *kilometer);
 
