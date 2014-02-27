@@ -48,8 +48,6 @@ int main(int argc, char *argv[])
 
     iodriver->start(gps_data_source_gps);
 
-    cookies->trackNumberInMph.requestValue ();
-
     qDebug() << "Loading map...";
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
@@ -65,6 +63,8 @@ int main(int argc, char *argv[])
     QObject::connect (elMap, SIGNAL(isLocatedChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
 //    QObject::connect (elMap, SIGNAL(activityChanged(bool)), emapCanEmitter, SLOT(setActivity(bool)));
 //    QObject::connect (elMap, SIGNAL(ordinateUpdated(int)), customOrdinateHandler, SLOT(setCurrentOrdinate(int)));
+
+    cookies->trackNumberInMph.requestValue ();
     
     return a.exec();
 }
