@@ -23,7 +23,7 @@ using namespace std;
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
     firstEnter(true),
-    x(0), _prewX(0), ordinate(1100),
+    x(0), _prewX(0), ordinate(1100), trackNumber(0),
     departPost(nullptr), targetPost(nullptr),
     xReceived(false), mapLoaded(false), isLocated(false),
     trainLength(0)
