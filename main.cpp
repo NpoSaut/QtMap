@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
     elMap->load ("./map.gps");
     qDebug() << "Map loaded.";
 
-    QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
+    //QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
+    QObject::connect (emapCanEmitter, SIGNAL(latLonChanged(double,double)), elMap, SLOT(checkMap(double,double)));
     QObject::connect (&cookies->trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer()));
