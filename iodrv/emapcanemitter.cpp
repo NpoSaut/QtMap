@@ -24,6 +24,7 @@ EMapCanEmitter::EMapCanEmitter(Can *can, QObject *parent) :
     QObject::connect (can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getTargetNumberFromMcoLimits(CanFrame)));
     QObject::connect (can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getMetrometerFromIpdState(CanFrame)));
     QObject::connect (can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getIpdRestartFromSautInfo(CanFrame)));
+    QObject::connect (can, SIGNAL(messageReceived(CanFrame)), this, SLOT(getLatLonFromMmLatLong(CanFrame)));
 }
 
 EMapCanEmitter::CanMessageData EMapCanEmitter::encodeEMapTarget(const EMapTarget& t, int targetNumber)
@@ -139,6 +140,20 @@ void EMapCanEmitter::getMetrometerFromIpdState(CanFrame canFrame)
                                     canFrame.getData () [5],
                                     (canFrame.getData () [5] & (1 << 7)) ? 0xFF : 0});
         emit metrometerChanged (meters);
+    }
+}
+
+void EMapCanEmitter::getLatLonFromMmLatLong(CanFrame canFrame)
+{
+    if ( canFrame.getDescriptor () == 0x4268 )
+    {
+        int iLat = (canFrame[0]) | (canFrame[1] << 8) | (canFrame[2] << 16) | (canFrame[3] << 24);
+        double lat = iLat * 180.0 / ((double)1e8 * 3.14159265359);
+
+        int iLon = (canFrame[4]) | (canFrame[5] << 8) | (canFrame[6] << 16) | ((canFrame[7] << 24) & 0x7f);
+        double lat = iLat * 180.0 / ((double)1e8 * 3.14159265359);
+
+        emit latLonChanged (lat, lon);
     }
 }
 

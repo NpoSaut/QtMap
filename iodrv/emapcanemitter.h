@@ -49,6 +49,7 @@ signals:
     void targetTypeChanged (int type);
     void metrometerChanged (int meters);
     void metrometerReset ();
+    viod latLonChanged(double lat, double lon);
 
 public slots:
     void setObjectsList (const std::vector<EMapTarget> objects);
@@ -74,6 +75,7 @@ private slots:
     void getTargetNumberFromMcoLimits (CanFrame canFrame);
     void getMetrometerFromIpdState (CanFrame canFrame);
     void getIpdRestartFromSautInfo (CanFrame canFrame);
+    void getLatLonFromMmLatLong (CanFrame canFrame);
 };
 
 #endif // EMAPCANEMITTER_H
