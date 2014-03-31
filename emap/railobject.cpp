@@ -29,47 +29,57 @@ RailObject *RailObject::loadFrom(const QByteArray &rawData, int offset, int inde
         obj->length = data.length;
         obj->alsnFreq = data.alsnFreq;
         obj->name = cp1251Decoder->toUnicode (data.name, 8).trimmed ();
+        obj->speedRestriction = data.speedRestriction;
         break;
     case DangerousPlace:
         obj->length = data.length;
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Bridge:
         obj->length = data.length;
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Crossing:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Platform:
         obj->length = data.length;
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Tunnel:
         obj->length = data.length;
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Switch:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
         obj->name = cp1251Decoder->toUnicode (data.name, 8).trimmed ();
+        obj->speedRestriction = data.speedRestriction;
         break;
     case Tks:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case GpuSaut:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     case DeadEnd:
         obj->alsEn = data.alsEn;
         obj->alsnFreq = data.alsnFreq;
+        obj->speedRestriction = data.speedRestriction;
         break;
     default:
         break;
