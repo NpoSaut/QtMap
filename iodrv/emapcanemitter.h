@@ -49,7 +49,7 @@ signals:
     void targetTypeChanged (int type);
     void metrometerChanged (int meters);
     void metrometerReset ();
-    viod latLonChanged(double lat, double lon);
+    void latLonChanged(double lat, double lon);
 
 public slots:
     void setObjectsList (const std::vector<EMapTarget> objects);
