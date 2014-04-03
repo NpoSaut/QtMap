@@ -150,8 +150,8 @@ void EMapCanEmitter::getLatLonFromMmLatLong(CanFrame canFrame)
         int iLat = (canFrame[0]) | (canFrame[1] << 8) | (canFrame[2] << 16) | (canFrame[3] << 24);
         double lat = iLat * 180.0 / ((double)1e8 * 3.14159265359);
 
-        int iLon = (canFrame[4]) | (canFrame[5] << 8) | (canFrame[6] << 16) | ((canFrame[7] << 24) & 0x7f);
-        double lon = iLat * 180.0 / ((double)1e8 * 3.14159265359);
+        int iLon = (canFrame[4]) | (canFrame[5] << 8) | (canFrame[6] << 16) | ((canFrame[7] & 0x7f) << 24);
+        double lon = iLon * 180.0 / ((double)1e8 * 3.14159265359);
 
         emit latLonChanged (lat, lon);
     }
