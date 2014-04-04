@@ -194,6 +194,17 @@ void ElectroincMap::checkMap(double lat, double lon)
         firstEnter = false;
     }
 
+
+    printf(" { ");
+    if (departPost == nullptr) { CPRINTF(CL_RED_L, "null"); }
+    else { CPRINTF(CL_YELLOW_L, "%3.1f", departPost->ordinate / 1000.0); }
+    printf(" --> ");
+    if (targetPost == nullptr) { CPRINTF(CL_RED_L, "null"); }
+    else { CPRINTF(CL_YELLOW_L, "%3.1f", targetPost->ordinate / 1000.0); }
+    printf(" } ");
+    CPRINTF(CL_CYAN, "%3.3f", ordinate / 1000.0);
+    printf("\n");
+
     if (getMyRail(departPost) == nullptr)
     {
         CPRINTF(CL_RED, " -- введён несуществующий путь\n");
@@ -247,7 +258,14 @@ void ElectroincMap::checkMap(double lat, double lon)
 
         KilometerPost *p = projectNextPost(targetPost, true);
         if (p == nullptr) setIsLocated(false);
-        else departPost = p;
+        else
+        {
+            if (p != departPost)
+            {
+                departPost = p;
+                departX = x - departPost->distanceTo(lat, lon);
+            }
+        }
 
         CPRINTF(CL_YELLOW_L, "      CHECKED TO [%8.0f  -->  %8.0f]\n", departPost->ordinate, targetPost->ordinate);
     }
@@ -276,7 +294,7 @@ void ElectroincMap::checkMap(double lat, double lon)
         departPost = targetPostApproach->post;
         departX    = targetPostApproach->getX();
 
-        // Устанавливаем признак "в карте"
+        // Устанавливаем признак "в карте"Не запускаешь карту,
         setIsLocated (true);
         emit onPostDetected(*departPost, departX);
 
