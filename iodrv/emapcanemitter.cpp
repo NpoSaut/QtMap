@@ -147,11 +147,11 @@ void EMapCanEmitter::getLatLonFromMmLatLong(CanFrame canFrame)
 {
     if ( canFrame.getDescriptor () == 0x4268 )
     {
-        int iLat = (canFrame[0]) | (canFrame[1] << 8) | (canFrame[2] << 16) | (canFrame[3] << 24);
-        double lat = iLat * 180.0 / ((double)1e8 * 3.14159265359);
+        int iLat = (canFrame.getData()[0]) | (canFrame.getData()[1] << 8) | (canFrame.getData()[2] << 16) | (canFrame.getData()[3] << 24);
+        double lat = (double)iLat * 180.0 / (3.14159265359 * 1e9);
 
-        int iLon = (canFrame[4]) | (canFrame[5] << 8) | (canFrame[6] << 16) | ((canFrame[7] & 0x7f) << 24);
-        double lon = iLon * 180.0 / ((double)1e8 * 3.14159265359);
+        int iLon = (canFrame.getData()[4]) | (canFrame.getData()[5] << 8) | (canFrame.getData()[6] << 16) | ((canFrame.getData()[7] & 0x7f) << 24);
+        double lon = (double)iLon * 180.0 / (3.14159265359 * 1e9);
 
         emit latLonChanged (lat, lon);
     }
