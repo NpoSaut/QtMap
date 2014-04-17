@@ -12,7 +12,7 @@
 #include "qtBlokLib/iodrv.h"
 #include "qtBlokLib/cookies.h"
 
-#ifdef WITH_CAN
+#ifdef LIB_SOCKET_CAN
 #include "qtCanLib/socketcan.h"
 #else
 #include "qtCanLib/dummycan.h"
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     system("chcp 65001");
 #endif
 
-#ifdef WITH_CAN
+#ifdef LIB_SOCKET_CAN
     can = new SocketCan();
 #else
     can = new DummyCan();
