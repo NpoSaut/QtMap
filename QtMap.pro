@@ -64,6 +64,7 @@ HEADERS += \
     customordinatehandler.h
 
 CONFIG += console
+CONFIG += serialport
 
 QMAKE_CXXFLAGS += -std=c++0x
 
