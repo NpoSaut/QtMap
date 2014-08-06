@@ -9,10 +9,13 @@ CustomOrdinateHandler::CustomOrdinateHandler(Can *can, Cookies *cookies, QObject
     QObject::connect (can, SIGNAL(messageReceived(CanFrame)), this, SLOT(processCanWriteCookieMessage(CanFrame)));
     QObject::connect (&cookies->startOrdinate, SIGNAL(onChange(int)), this, SLOT(processCookieOrdinate(int)));
     QObject::connect (&cookies->ordinateIncreaseDirection, SIGNAL(onChange(int)), this, SLOT(processCookieDirection(int)));
-    cookies->startOrdinate.requestValue ();
-    cookies->ordinateIncreaseDirection.requestValue ();
 }
 
+void CustomOrdinateHandler::requestValues()
+{
+	cookies->startOrdinate.requestValue();
+	cookies->ordinateIncreaseDirection.requestValue();
+}
 
 void CustomOrdinateHandler::setCurrentOrdinate(int ordinate)
 {
