@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 //    QObject::connect (elMap, SIGNAL(ordinateUpdated(int)), customOrdinateHandler, SLOT(setCurrentOrdinate(int)));
 
     cookies->trackNumberInMph.requestValue ();
+	customOrdinateHandler.requestValues();
     
     return a.exec();
 }

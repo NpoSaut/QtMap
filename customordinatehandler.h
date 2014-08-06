@@ -12,6 +12,10 @@ class CustomOrdinateHandler : public QObject
     Q_OBJECT
 public:
     explicit CustomOrdinateHandler(Can *can, Cookies *cookies, QObject *parent = 0);
+	
+	// Запрашивает все текущие значения из МПХ
+	// Необходимо вызвать послед того, как все сигналы-слоты будут привязаны, но до использования
+	void requestValues();
     
 signals:
     // Испускается при изменении кастомной ординаты из вне
