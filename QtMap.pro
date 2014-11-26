@@ -34,7 +34,14 @@ SOURCES += \
     qtBlokLib/endecs.cpp \
     qtBlokLib/cookies.cpp \
     electroincmap.cpp \
-    customordinatehandler.cpp
+    customordinatehandler.cpp \
+    nmeareceiver.cpp \
+    qtBlokLib/parsers/canblokmessage.cpp \
+    qtBlokLib/parsers/mm_alt_long.cpp \
+    qtBlokLib/parser.cpp \
+    qtBlokLib/parsers/ipd_date.cpp \
+    qtBlokLib/parsers/mm_data.cpp \
+    iodrv/gpsemitter.cpp
 
 HEADERS += \
     emap/routesection.h \
@@ -61,7 +68,14 @@ HEADERS += \
     qtCanLib/can.h \
     qtDoodahLib/queues.h \
     electroincmap.h \
-    customordinatehandler.h
+    customordinatehandler.h \
+    nmeareceiver.h \
+    qtBlokLib/parsers/canblokmessage.h \
+    qtBlokLib/parsers/mm_alt_long.h \
+    qtBlokLib/parser.h \
+    qtBlokLib/parsers/ipd_date.h \
+    qtBlokLib/parsers/mm_data.h \
+    iodrv/gpsemitter.h
 
 CONFIG += console
 CONFIG += serialport
