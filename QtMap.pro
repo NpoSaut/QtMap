@@ -67,6 +67,7 @@ CONFIG += console
 CONFIG += serialport
 
 QMAKE_CXXFLAGS += -std=c++0x
+DEFINES+=CPP11
 
 # Чтобы работало, нужно компилировать с:
-# LIBS+=-lQtSerialPort DEFINES+=LIB_SOCKET_CAN DEFINES+=CPP11 DEFINES+=WITH_SERIALPORT
+# DEFINES+=LIB_SOCKET_CAN DEFINES+=WITH_SERIALPORT
