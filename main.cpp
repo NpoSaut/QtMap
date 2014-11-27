@@ -6,9 +6,6 @@
     HANDLE winConsoleandler;
 #endif
 
-#include "electroincmap.h"
-#include "customordinatehandler.h"
-
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
 #include "qtBlokLib/cookies.h"
@@ -18,8 +15,17 @@
 #else
 #include "qtCanLib/dummycan.h"
 #endif
+#include "qtBlokLib/parser.h"
+
+#include "nmeareceiver.h"
+#include "iodrv/gpsemitter.h"
+#include "electroincmap.h"
+#include "customordinatehandler.h"
 
 Can *can;
+Parser *parser;
+NmeaReceiver *nmea;
+GpsEmitter *gpsEmitter;
 Navigation::ElectroincMap* elMap;
 iodrv* iodriver;
 EMapCanEmitter* emapCanEmitter;
@@ -41,10 +47,39 @@ int main(int argc, char *argv[])
 #else
     can = new DummyCan();
 #endif
+    parser = new Parser (can);
+    cookies = new Cookies(can);
+
+    QSerialPort serialPort;
+//    QList<QSerialPortInfo> spinfo = QSerialPortInfo::availablePorts();
+//    if (spinfo.count() == 0)
+//    {
+//        fprintf(stderr, "Не найдено ни одного последовательного порта\n"); fflush(stderr);
+//        // Для обхода бага библиотеки QtSerialPort под arm обходим эту проверку
+//        //return 0;
+//    }
+//    serialPort.setPort(spinfo.at(0));
+    serialPort.setPortName("/dev/ttySAC1");
+
+    serialPort.setDataBits(QSerialPort::Data8);
+    serialPort.setBaudRate(QSerialPort::Baud115200);
+    serialPort.setParity(QSerialPort::NoParity);
+    serialPort.setStopBits(QSerialPort::OneStop);
+    serialPort.setFlowControl(QSerialPort::NoFlowControl);
+    nmea = new NmeaReceiver (&serialPort);
+
+    gpsEmitter = new GpsEmitter(can);
+    gpsEmitter->connect(nmea, SIGNAL(validChanged(bool)), SLOT(setValid(bool)));
+    gpsEmitter->connect(nmea, SIGNAL(geoPositionChanged(double,double)), SLOT(setPosition(double,double)));
+    gpsEmitter->connect(nmea, SIGNAL(speedChanged(double)), SLOT(setSpeed(double)));
+    gpsEmitter->connect(nmea, SIGNAL(dateTimeChanged(QDateTime)), SLOT(setDateTime(QDateTime)));
+    gpsEmitter->connect(nmea, SIGNAL(messageReceived()), gpsEmitter,  SLOT(sendData()));
+    gpsEmitter->connect(&cookies->timeZone, SIGNAL(onChange(int)), SLOT(setTimeZone(int)));
+    cookies->timeZone.requestValue();
+
     elMap = new Navigation::ElectroincMap();
     iodriver = new iodrv(can);
     emapCanEmitter = new EMapCanEmitter(can);
-    cookies = new Cookies(can);
     customOrdinateHandler = new CustomOrdinateHandler (can, cookies);
 
     iodriver->start(gps_data_source_gps);
@@ -53,7 +88,7 @@ int main(int argc, char *argv[])
     elMap->load ("/media/dat/QtMap/map.gps");
     qDebug() << "Map loaded.";
 
-    QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));
+    QObject::connect (nmea, SIGNAL(geoPositionChanged(double,double)), elMap, SLOT(checkMap(double,double)));
     QObject::connect (&cookies->trackNumberInMph, SIGNAL(onChange(int)), elMap, SLOT(setTrackNumber(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerChanged(int)), elMap, SLOT(setMetrometer(int)));
     QObject::connect (emapCanEmitter, SIGNAL(metrometerReset()), elMap, SLOT(resetMetrometer()));

@@ -16,6 +16,7 @@ signals:
     void dateTimeChanged (QDateTime dt);
     void speedChanged (double kmh);
     void validChanged (bool valid);
+    void messageReceived ();
 
 public slots:
 

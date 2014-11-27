@@ -28,7 +28,6 @@ SOURCES += \
     emap/kilometerpost.cpp \
     emap/emaptarget.cpp \
     iodrv/emapcanemitter.cpp \
-    qtBlokLib/sysdiagnostics.cpp \
     qtBlokLib/modulesactivity.cpp \
     qtBlokLib/iodrv.cpp \
     qtBlokLib/endecs.cpp \
@@ -41,7 +40,22 @@ SOURCES += \
     qtBlokLib/parser.cpp \
     qtBlokLib/parsers/ipd_date.cpp \
     qtBlokLib/parsers/mm_data.cpp \
-    iodrv/gpsemitter.cpp
+    iodrv/gpsemitter.cpp \
+    qtBlokLib/parsers/aux_resource.cpp \
+    qtBlokLib/parsers/console_key.cpp \
+    qtBlokLib/parsers/display_state.cpp \
+    qtBlokLib/parsers/ipd_state.cpp \
+    qtBlokLib/parsers/mco_limits.cpp \
+    qtBlokLib/parsers/mco_mode.cpp \
+    qtBlokLib/parsers/mco_state.cpp \
+    qtBlokLib/parsers/mm_coord.cpp \
+    qtBlokLib/parsers/mp_state.cpp \
+    qtBlokLib/parsers/mvd_dd.cpp \
+    qtBlokLib/parsers/sys_key.cpp \
+    qtBlokLib/parsers/tskbm_state.cpp \
+    qtBlokLib/parsers/uktol_dd1.cpp \
+    qtBlokLib/parsers/vds_state.cpp \
+    qtBlokLib/parsers/sys_diagnostics.cpp
 
 HEADERS += \
     emap/routesection.h \
@@ -54,7 +68,6 @@ HEADERS += \
     cDoodahLib/packing.h \
     cDoodahLib/masqarade.h \
     cDoodahLib/lowlevel.h \
-    qtBlokLib/sysdiagnostics.h \
     qtBlokLib/modulesactivity.h \
     qtBlokLib/iodrvmain.h \
     qtBlokLib/iodrv.h \
@@ -75,7 +88,26 @@ HEADERS += \
     qtBlokLib/parser.h \
     qtBlokLib/parsers/ipd_date.h \
     qtBlokLib/parsers/mm_data.h \
-    iodrv/gpsemitter.h
+    iodrv/gpsemitter.h \
+    qtBlokLib/parsers/autolockmode.h \
+    qtBlokLib/parsers/aux_resource.h \
+    qtBlokLib/parsers/console_key.h \
+    qtBlokLib/parsers/display_state.h \
+    qtBlokLib/parsers/drivemode.h \
+    qtBlokLib/parsers/ipd_state.h \
+    qtBlokLib/parsers/mco_limits.h \
+    qtBlokLib/parsers/mco_mode.h \
+    qtBlokLib/parsers/mco_state.h \
+    qtBlokLib/parsers/mm_coord.h \
+    qtBlokLib/parsers/mp_state.h \
+    qtBlokLib/parsers/mvd_dd.h \
+    qtBlokLib/parsers/pressure.h \
+    qtBlokLib/parsers/sys_key.h \
+    qtBlokLib/parsers/trafficlight.h \
+    qtBlokLib/parsers/tskbm_state.h \
+    qtBlokLib/parsers/uktol_dd1.h \
+    qtBlokLib/parsers/vds_state.h \
+    qtBlokLib/parsers/sys_diagnostics.h
 
 CONFIG += console
 CONFIG += serialport
