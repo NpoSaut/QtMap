@@ -32,3 +32,6 @@ desktop.ini
 # Editors temporary files 
 *~
 *.autosave
+
+# Случайные *.gps в MapData
+MapData-script/*.gps
