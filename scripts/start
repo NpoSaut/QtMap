@@ -1,7 +1,0 @@
-#!/bin/sh
-
-stty -F /dev/ttySAC1 115200
-
-./QtMap
-
-exit 0

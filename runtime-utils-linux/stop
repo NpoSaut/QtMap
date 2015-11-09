@@ -1,0 +1,5 @@
+#!/bin/sh
+
+kill -9 `cat "$TMP/QtMap-start.pid"` && rm "$TMP/QtMap-start.pid"
+
+exit 0
