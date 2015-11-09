@@ -1,0 +1,2 @@
+MapData-script/* text=auto eol=lf
+MapData-script/*.* -text -eol
