@@ -18,6 +18,11 @@ using namespace Navigation;
 #define D_foreach(l, T, itr) for (list<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 #define D_foreach_vec(l, T, itr) for (vector<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 
+double abs (double x)
+{
+    return x >= 0 ? x : -x;
+}
+
 using namespace std;
 
 ElectroincMap::ElectroincMap(QObject *parent) :
@@ -41,7 +46,7 @@ string getProgressbar(double val, double maxVal, QChar filler = '=', int length 
         if (i < activeSegmentsCount) res += filler;
         else res += ' ';
     }
-    return res.toStdString();
+    return res.toUtf8().data();
 }
 
 
@@ -474,7 +479,7 @@ void ElectroincMap::checkObjects()
         printf(" dist: ");
         CPRINTF(CL_CYAN_L, "%4.0f", t.x - x);
 
-        CPRINTF(CL_VIOLET, "   %s", t.object->getName ().toStdString ().c_str ());
+        CPRINTF(CL_VIOLET, "   %s", t.object->getName().toUtf8().data());
         printf("\n");
     }
     emit onUpcomingTargets (targets);
