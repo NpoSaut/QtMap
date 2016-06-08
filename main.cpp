@@ -9,6 +9,7 @@
 
 #include "electroincmap.h"
 #include "customordinatehandler.h"
+#include "MapcodeInformer.h"
 
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
@@ -68,6 +69,8 @@ int main(int argc, char *argv[])
 
     cookies->trackNumberInMph.requestValue ();
     customOrdinateHandler->requestValues();
+
+    MapcodeInformer mapcodeInformer (elMap, can);
     
     return a.exec();
 }

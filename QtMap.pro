@@ -34,7 +34,8 @@ SOURCES += \
     qtBlokLib/endecs.cpp \
     qtBlokLib/cookies.cpp \
     electroincmap.cpp \
-    customordinatehandler.cpp
+    customordinatehandler.cpp \
+    MapcodeInformer.cpp
 
 HEADERS += \
     emap/routesection.h \
@@ -61,7 +62,8 @@ HEADERS += \
     qtCanLib/can.h \
     qtDoodahLib/queues.h \
     electroincmap.h \
-    customordinatehandler.h
+    customordinatehandler.h \
+    MapcodeInformer.h
 
 CONFIG += console
 CONFIG += serialport
