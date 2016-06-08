@@ -2,6 +2,7 @@
 
 #include "cDoodahLib/masqarade.h"
 #ifdef _WIN32
+    #include <windows.h>
     HANDLE winConsoleandler;
 #endif
 
