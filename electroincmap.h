@@ -22,6 +22,7 @@ class ElectroincMap : public QObject
 
 private:
     bool mapLoaded;
+    int mapNumber;
     bool xReceived;
 
     bool isLocated;
@@ -122,6 +123,7 @@ public:
     void load(QString fileName);
     bool getIsLocated();
     double getOrdinate();
+    int getMapNumber();
 
 signals:
     void onPostDetected(KilometerPost post, double x);

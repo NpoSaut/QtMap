@@ -25,7 +25,7 @@ ElectroincMap::ElectroincMap(QObject *parent) :
     firstEnter(true),
     x(0), _prewX(0), ordinate(0), trackNumber(0),
     departPost(nullptr), targetPost(nullptr),
-    xReceived(false), mapLoaded(false), isLocated(false),
+    xReceived(false), mapLoaded(false), mapNumber(-1), isLocated(false),
     trainLength(0)
 { }
 
@@ -51,6 +51,9 @@ void ElectroincMap::load(QString fileName)
     QFile mapFile (fileName);
     mapFile.open(QIODevice::ReadOnly);
     QByteArray data = mapFile.readAll ();
+
+    // Номер карты
+    mapNumber = data[4] | data[5] << 8;
 
     // Количество столбов
     int postsCount = data[2] | data[3] << 8;
@@ -87,6 +90,11 @@ bool ElectroincMap::getIsLocated()
 double ElectroincMap::getOrdinate()
 {
     return ordinate;
+}
+
+int ElectroincMap::getMapNumber()
+{
+    return mapNumber;
 }
 
 void ElectroincMap::setMetrometer(int value)
