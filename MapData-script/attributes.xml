@@ -1,0 +1,3 @@
+<Attributes>
+	<SetPremissions File="deploy" Premissions="750" />
+</Attributes>

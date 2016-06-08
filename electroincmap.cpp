@@ -48,7 +48,7 @@ string getProgressbar(double val, double maxVal, QChar filler = '=', int length 
         if (i < activeSegmentsCount) res += filler;
         else res += ' ';
     }
-    return res.toStdString();
+    return res.toUtf8().data();
 }
 
 
@@ -489,7 +489,7 @@ void ElectroincMap::checkObjects()
         printf(" dist: ");
         CPRINTF(CL_CYAN_L, "%4.0f", t.x - x);
 
-        CPRINTF(CL_VIOLET, "   %s", t.object->getName ().toStdString ().c_str ());
+        CPRINTF(CL_VIOLET, "   %s", t.object->getName().toUtf8().data());
         printf("\n");
     }
     emit onUpcomingTargets (targets);

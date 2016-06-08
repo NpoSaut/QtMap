@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QProcessEnvironment>
 
 #include "cDoodahLib/masqarade.h"
 #ifdef _WIN32
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
     iodriver->start(gps_data_source_gps);
 
     qDebug() << "Loading map...";
-    elMap->load ("/media/dat/QtMap/map.gps");
+    elMap->load (QProcessEnvironment::systemEnvironment().value("SHARE") + "/map.gps");
     qDebug() << "Map loaded.";
 
     QObject::connect (iodriver, SIGNAL(signal_lat_lon(double,double)), elMap, SLOT(checkMap(double,double)));

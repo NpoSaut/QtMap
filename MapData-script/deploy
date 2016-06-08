@@ -1,0 +1,8 @@
+#!/bin/sh
+
+for filename in *.gps;
+do
+	ln -fs "`pwd`/$filename" "$SHARE"/map.gps
+done
+
+exit 0

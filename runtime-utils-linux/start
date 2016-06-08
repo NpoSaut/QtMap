@@ -1,0 +1,11 @@
+#!/bin/sh
+
+stty -F /dev/ttySAC1 115200
+
+echo -n "$$" > "$TMP/QtMap-start.pid"
+while :
+do
+        ./QtMap
+done
+
+exit 0

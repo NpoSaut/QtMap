@@ -1,0 +1,5 @@
+<Attributes>
+	<SetPremissions File="start" Premissions="750" />
+	<SetPremissions File="stop" Premissions="750" />
+	<SetPremissions File="QtMap" Premissions="750" />
+</Attributes>
