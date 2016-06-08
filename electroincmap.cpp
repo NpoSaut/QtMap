@@ -12,13 +12,20 @@
 
 #include "iodrv/emapcanemitter.h"
 
-using namespace Navigation;
 #include <QDebug>
+
+using namespace Navigation;
+using namespace std;
 
 #define D_foreach(l, T, itr) for (list<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 #define D_foreach_vec(l, T, itr) for (vector<T>::iterator itr=l.begin(); itr != l.end(); ++itr)
 
-using namespace std;
+#ifndef _WIN32
+double abs (double x)
+{
+    return x >= 0 ? x : -x;
+}
+#endif
 
 ElectroincMap::ElectroincMap(QObject *parent) :
     QObject(parent),
