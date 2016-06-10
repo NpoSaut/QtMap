@@ -1,0 +1,9 @@
+<Package>
+	<Component>
+		<BootloaderRequirement Id="6" Version="1" CompatibleVersion="1" />
+		<Target Cell="30" Modification="1" Module="2" Channel="1" />
+		<Files>
+			<MapFolder From="bin\" Pattern="*" To="" />
+		</Files>
+	</Component>
+</Package>

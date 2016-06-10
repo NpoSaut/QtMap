@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Saut\FmPack\FmPack.exe" "%~dp0packer-project.fpc" "{cell} - {module} - {version-major}.{version-minor}{version-label}.sfp"
