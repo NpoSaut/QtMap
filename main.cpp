@@ -10,6 +10,7 @@
 #include "electroincmap.h"
 #include "customordinatehandler.h"
 #include "MapcodeInformer.h"
+#include "VersionInformer.h"
 
 #include "iodrv/emapcanemitter.h"
 #include "qtBlokLib/iodrv.h"
@@ -71,6 +72,13 @@ int main(int argc, char *argv[])
     customOrdinateHandler->requestValues();
 
     MapcodeInformer mapcodeInformer (elMap, can);
+
+    auto environment = QProcessEnvironment::systemEnvironment();
+    VersionInformer versionInformer (
+                environment.value("VERSION_MAJOR", "0").toInt(),
+                environment.value("VERSION_MINOR", "0").toInt(),
+                environment.value("VERSION_CHECKSUM", "0").toInt(),
+                can);
     
     return a.exec();
 }
